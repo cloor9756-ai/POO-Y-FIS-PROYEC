@@ -131,3 +131,14 @@ body {
 .btn-submit:active {
     transform: translateY(0);
 }
+
+        /* Estilos modernos para la tabla de datos */
+        .table-container { background: #fff; padding: 25px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); margin-top: 10px; }
+        .table-container h2 { font-size: 18px; margin-bottom: 20px; color: #222; font-weight: 600; }
+        .data-table { width: 100%; border-collapse: collapse; text-align: left; }
+        .data-table th, .data-table td { padding: 14px 16px; border-bottom: 1px solid #edf2f7; font-size: 15px; }
+        .data-table th { background-color: #f8fafc; color: #4a5568; font-weight: 600; text-transform: uppercase; font-size: 12px; letter-spacing: 0.5px; }
+        .data-table tr:hover { background-color: #fcfdfe; }
+        .badge { padding: 5px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; display: inline-block; }
+        .badge-admin { background: rgba(0, 114, 255, 0.1); color: #0072ff; }
+        .badge-user { background: rgba(108, 108, 125, 0.1); color: #6c6c7d; }

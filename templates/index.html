@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inicio de Sesión a MaterialGo </title>
-    <!-- Vinculación con tu archivo CSS -->
+    <title>Inicio de Sesión a MaterialGo</title>
+    <!-- Vinculación correcta con tu archivo CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/estilos.css') }}">
     <!-- Iconos externos para los campos -->
     <link rel="stylesheet" href="https://cloudflare.com">
@@ -17,6 +17,7 @@
                 <p>Ingresa tus credenciales para acceder</p>
             </div>
             
+            <!-- CORREGIDO: Formulario con action y method bien estructurados -->
             <form action="" method="POST" class="login-form">
                 <div class="input-group">
                     <label for="username">Usuario</label>

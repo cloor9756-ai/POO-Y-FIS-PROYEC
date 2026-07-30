@@ -15,25 +15,32 @@ def login():
         cursor.close()
         
         if cuenta:
-            # SEGURIDAD: Guardamos el usuario en la sesión activa
             session['logueado'] = True
-            session['username'] = cuenta[1] # Guarda el nombre del usuario
+            session['username'] = usuario
+            session['tipo_usuario'] = cuenta[3] if len(cuenta) > 3 else 'Administrador'
             return redirect(url_for('admin.dashboard'))
         else:
             flash('Usuario o contraseña incorrectos', 'error')
             return redirect(url_for('admin.login'))
             
-    return render_template("accseso/index.html")
+    return render_template("index.html")
 
 @admin.route('/dashboard')
 def dashboard():
-    # SEGURIDAD: Si no ha iniciado sesión, lo regresa al login
     if not session.get('logueado'):
         return redirect(url_for('admin.login'))
-    return render_template("admin/dasboard.html")
+        
+    # Consultamos los usuarios de la base de datos de forma dinámica
+    from app import mysql
+    cursor = mysql.connection.cursor()
+    cursor.execute("SELECT id, username, rol FROM usuarios")
+    lista_usuarios = cursor.fetchall()
+    cursor.close()
+    
+    # Enviamos los datos recuperados a la plantilla HTML
+    return render_template("admin/dashboard.html", usuarios=lista_usuarios)
 
 @admin.route('/logout')
 def logout():
-    # Limpia la sesión y cierra el acceso
     session.clear()
     return redirect(url_for('admin.login'))

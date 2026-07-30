@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MaterialGo - Panel de Control</title>
+    <link rel="stylesheet" href="https://cloudflare.com">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { display: flex; min-height: 100vh; background-color: #f4f6f9; color: #333; }
+        
+        /* Menú Lateral */
+        .sidebar { width: 260px; background-color: #1e1e2f; color: #fff; padding: 20px; display: flex; flex-direction: column; }
+        .sidebar h2 { font-size: 22px; text-align: center; margin-bottom: 30px; color: #00c6ff; font-weight: 700; letter-spacing: 0.5px; }
+        .menu-item { display: flex; align-items: center; gap: 15px; color: #b3b3b3; padding: 12px 15px; text-decoration: none; border-radius: 8px; margin-bottom: 8px; transition: all 0.3s; cursor: pointer; }
+        .menu-item:hover, .menu-item.active { background-color: rgba(255,255,255,0.05); color: #fff; }
+        .menu-item.active { border-left: 4px solid #0072ff; }
+        .logout { margin-top: auto; color: #ff4d4d; }
+        .logout:hover { background-color: rgba(255, 77, 77, 0.1); }
+
+        /* Contenido Principal */
+        .main-content { flex: 1; padding: 40px; display: flex; flex-direction: column; gap: 25px; }
+        .header { background: #fff; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); display: flex; justify-content: space-between; align-items: center; }
+        .header h1 { font-size: 24px; color: #222; }
+        .user-info { display: flex; align-items: center; gap: 10px; font-weight: 500; }
+        
+        /* Tarjetas de estado */
+        .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; }
+        .card { background: #fff; padding: 25px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); display: flex; align-items: center; justify-content: space-between; }
+        .card-info h3 { font-size: 14px; color: #888; text-transform: uppercase; margin-bottom: 5px; }
+        .card-info p { font-size: 28px; font-weight: 700; color: #222; }
+        .card-icon { font-size: 32px; color: #0072ff; background: rgba(0,114,255,0.1); padding: 12px; border-radius: 50px; }
+
+        /* Estilos de la tabla de datos */
+        .table-container { background: #fff; padding: 25px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); margin-top: 10px; }
+        .table-container h2 { font-size: 18px; margin-bottom: 20px; color: #222; font-weight: 600; }
+        .data-table { width: 100%; border-collapse: collapse; text-align: left; }
+        .data-table th, .data-table td { padding: 14px 16px; border-bottom: 1px solid #edf2f7; font-size: 15px; }
+        .data-table th { background-color: #f8fafc; color: #4a5568; font-weight: 600; text-transform: uppercase; font-size: 12px; letter-spacing: 0.5px; }
+        .data-table tr:hover { background-color: #fcfdfe; }
+        .badge { padding: 5px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; display: inline-block; }
+        .badge-admin { background: rgba(0, 114, 255, 0.1); color: #0072ff; }
+        .badge-user { background: rgba(108, 108, 125, 0.1); color: #6c6c7d; }
+    </style>
+</head>
+<body>
+
+    <!-- Barra Lateral Única -->
+    <div class="sidebar">
+        <h2>MaterialGo</h2>
+        <div id="btn-dash" class="menu-item active" onclick="cambiarSeccion('sec-dash', this)"><i class="fa-solid fa-chart-pie"></i> Dashboard</div>
+        <div class="menu-item" onclick="cambiarSeccion('sec-pedidos', this)"><i class="fa-solid fa-truck-ramp-box"></i> Pedidos Material</div>
+        <div class="menu-item" onclick="cambiarSeccion('sec-maquinaria', this)"><i class="fa-solid fa-screwdriver-wrench"></i> Retroexcavadoras</div>
+        <div class="menu-item" onclick="cambiarSeccion('sec-personal', this)"><i class="fa-solid fa-users"></i> Control Personal</div>
+        <a href="{{ url_for('admin.logout') }}" class="menu-item logout"><i class="fa-solid fa-right-from-bracket"></i> Cerrar Sesión</a>
+    </div>
+
+    <!-- Contenido Principal -->
+    <div class="main-content">
+        <div class="header">
+            <h1 id="titulo-panel">Panel de Control Principal</h1>
+            <div class="user-info">
+                <i class="fa-solid fa-circle-user fa-xl" style="color: #0072ff;"></i>
+                <span>{{ session['username'] }} ({{ session['tipo_usuario'] }})</span>
+            </div>
+        </div>
+
+        <!-- SECCIÓN 1: DASHBOARD -->
+        <div id="sec-dash" class="seccion-panel">
+            <div class="cards-grid">
+                <div class="card">
+                    <div class="card-info"><h3>Pedidos Activos</h3><p>0</p></div>
+                    <div class="card-icon"><i class="fa-solid fa-truck"></i></div>
+                </div>
+                <div class="card">
+                    <div class="card-info"><h3>Motor MySQL</h3><p>CONECTADO</p></div>
+                    <div class="card-icon" style="color: #2ecc71; background: rgba(46,204,113,0.1);"><i class="fa-solid fa-database"></i></div>
+                </div>
+                <div class="card">
+                    <div class="card-info"><h3>Servicios API</h3><p>Google Maps</p></div>
+                    <div class="card-icon" style="color: #9b59b6; background: rgba(155,89,182,0.1);"><i class="fa-solid fa-map-location-dot"></i></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECCIÓN 2: PEDIDOS -->
+        <div id="sec-pedidos" class="seccion-panel" style="display: none;">
+            <div class="table-container">
+                <h2>Gestión de Pedidos de Materiales</h2>
+                <p style="color: #666; margin-top: 10px;">Aquí se desplegarán las solicitudes de volquetas de arena, piedra y materiales de construcción.</p>
+            </div>
+        </div>
+
+        <!-- SECCIÓN 3: MAQUINARIA -->
+        <div id="sec-maquinaria" class="seccion-panel" style="display: none;">
+            <div class="table-container">
+                <h2>Control de Retroexcavadoras</h2>
+                <p style="color: #666; margin-top: 10px;">Módulo encargado del rastreo y asignación de maquinaria pesada a los choferes operadores.</p>
+            </div>
+        </div>
+
+        <!-- SECCIÓN 4: CONTROL DE PERSONAL (Tabla conectada a MySQL) -->
+        <div id="sec-personal" class="seccion-panel" style="display: none;">
+            <div class="table-container">
+                <h2>Personal Registrado en el Sistema</h2>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre de Usuario</th>
+                            <th>Rol / Puesto</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for usuario in usuarios %}
+                        <tr>
+                            <td>{{ usuario[0] }}</td>
+                            <td><strong>{{ usuario[1] }}</strong></td>
+                            <td>
+                                <span class="badge {% if usuario[2] == 'Administrador' %}badge-admin{% else %}badge-user{% endif %}">
+                                    {{ usuario[2] }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Script de navegación interactiva sin recarga de página -->
+    <script>
+        function cambiarSeccion(idSeccion, botonActivo) {
+            // Ocultar todas las secciones
+            const secciones = document.querySelectorAll('.seccion-panel');
+            secciones.forEach(sec => sec.style.display = 'none');
+            
+            // Mostrar la sección seleccionada
+            document.getElementById(idSeccion).style.display = 'block';
+            
+            // Cambiar dinámicamente el título superior según la sección para mejorar la experiencia
+            const titulos = {
+                'sec-dash': 'Panel de Control Principal',
+                'sec-pedidos': 'Módulo de Pedidos',
+                'sec-maquinaria': 'Gestión de Maquinaria Pesada',
+                'sec-personal': 'Control Interno de Personal'
+            };
+            document.getElementById('titulo-panel').innerText = titulos[idSeccion];
+            
+            // Actualizar estilo visual del menú lateral
+            const botones = document.querySelectorAll('.menu-item');
+            botones.forEach(btn => btn.classList.remove('active'));
+            botonActivo.classList.add('active');
+        }
+    </script>
+</body>
+</html>
