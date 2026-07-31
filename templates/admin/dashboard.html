@@ -49,8 +49,12 @@
 <body>
 
     <!-- Barra Lateral Única -->
-    <div class="sidebar">
-        <h2>MaterialGo</h2>
+       <div class="sidebar">
+        <!-- Contenedor del logotipo -->
+        <div style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 30px;">
+            <img src="{{ url_for('static', filename='imagen/image.png') }}" alt="Logo MaterialGo" style="max-width: 50px; height: auto; object-fit: contain;">
+            <h2 style="margin-bottom: 0;">MaterialGo</h2>
+        </div>
         <div id="btn-dash" class="menu-item active" onclick="cambiarSeccion('sec-dash', this)"><i class="fa-solid fa-chart-pie"></i> Dashboard</div>
         <div class="menu-item" onclick="cambiarSeccion('sec-pedidos', this)"><i class="fa-solid fa-truck-ramp-box"></i> Pedidos Material</div>
         <div class="menu-item" onclick="cambiarSeccion('sec-maquinaria', this)"><i class="fa-solid fa-screwdriver-wrench"></i> Retroexcavadoras</div>
@@ -144,16 +148,16 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% for pedido in pedidos %}
-                        <tr>
-                            <td>{{ pedido[0] }}</td>
-                            <td>${{ pedido[1] }}</td>
-                            <td>${{ pedido[2] }}</td>
-                            <td>${{ pedido[3] }}</td>
-                            <td><strong>${{ pedido[4] }}</strong></td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
+    {% for pedido in pedidos %}
+    <tr>
+        <td>{{ pedido[0] }}</td> <!-- ID del pedido -->
+        <td>${{ pedido[1] }}</td> <!-- Costo del Material -->
+        <td>${{ pedido[2] }}</td> <!-- Costo del Transporte -->
+        <td>${{ pedido[3] }}</td> <!-- Costo de Maquinaria -->
+        <td><strong>${{ pedido[4] }}</strong></td> <!-- Total Final -->
+    </tr>
+    {% endfor %}
+</tbody>
                 </table>
             </div>
         </div>

@@ -1,4 +1,17 @@
-CREATE TABLE IF NOT EXISTS pedidos (
+from flask import current_app
+from app import mysql
+
+
+CREATE TABLE usuarios (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) NOT NULL,
+    password VARCHAR(255) NOT NULL
+);
+
+-- Inserta un usuario de prueba para testear tu formulario
+INSERT INTO usuarios (username, password) VALUES ('admin', '1234');
+
+CREATE TABLE pedidos (
     id INT AUTO_INCREMENT PRIMARY KEY,
     costo_material DECIMAL(10,2) NOT NULL,
     costo_transporte DECIMAL(10,2) NOT NULL,
@@ -7,8 +20,10 @@ CREATE TABLE IF NOT EXISTS pedidos (
     fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- 2. Asegurémonos de tener también la de maquinaria (corregida sin la "s" al final)
-CREATE TABLE IF NOT EXISTS maquinaria (
+DROP TABLE IF EXISTS maquinaria;
+
+-- 2. Crea la tabla correcta
+CREATE TABLE maquinaria (
     id INT AUTO_INCREMENT PRIMARY KEY,
     codigo_maquina VARCHAR(50) NOT NULL UNIQUE,
     tipo VARCHAR(100) DEFAULT 'Retroexcavadora',
@@ -16,11 +31,7 @@ CREATE TABLE IF NOT EXISTS maquinaria (
     horas_totales INT DEFAULT 0
 );
 
--- 3. Insertar datos de prueba para la maquinaria
-INSERT INTO maquinaria (codigo_maquina, tipo, estado, horas_totales) 
-VALUES ('RETRO-01', 'Retroexcavadora', 'Disponible', 120)
-ON DUPLICATE KEY UPDATE codigo_maquina=codigo_maquina;
-
-INSERT INTO maquinaria (codigo_maquina, tipo, estado, horas_totales) 
-VALUES ('RETRO-02', 'Retroexcavadora', 'En Servicio', 340)
-ON DUPLICATE KEY UPDATE codigo_maquina=codigo_maquina;
+-- 3. Inserta los datos de prueba limpios
+INSERT INTO maquinaria (codigo_maquina, tipo, estado, horas_totales) VALUES 
+('RETRO-01', 'Retroexcavadora', 'Disponible', 120),
+('RETRO-02', 'Retroexcavadora', 'En Servicio', 340);
