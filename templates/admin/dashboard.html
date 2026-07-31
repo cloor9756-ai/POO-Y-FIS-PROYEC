@@ -63,7 +63,7 @@
     </div>
 
     <!-- Contenido Principal -->
-    <div class="main-content">
+      <div class="main-content">
         <div class="header">
             <h1 id="titulo-panel">Panel de Control Principal</h1>
             <div class="user-info">
@@ -99,7 +99,7 @@
 
 
          <!-- SECCIÓN 2: PEDIDOS -->
-        <div id="sec-pedidos" class="seccion-panel" style="display: none;">
+ <div id="sec-pedidos" class="seccion-panel" style="display: none;">
             <div class="table-container">
                 <h2>Crear Nuevo Pedido de Material</h2>
                 
@@ -107,15 +107,17 @@
                     <div>
                         <label style="display:block; margin-bottom:5px; font-weight:600;">Tipo de Material</label>
                         <select name="material" required style="width:100%; padding:10px; border-radius:6px; border:1px solid #ccc;">
-                            <option value="150.0">Volqueta de Arena ($150.00)</option>
-                            <option value="180.0">Volqueta de Piedra ($180.00)</option>
-                            <option value="120.0">Volqueta de Lastre ($120.00)</option>
+                            <!-- precios de individuales de materiales -->
+                            <option value="150.0">Volqueta de Arena ($60.00)</option>
+                            <option value="180.0">Volqueta de Piedra ($45.00)</option>
+                            <option value="120.0">Volqueta de Lastre ($35.00)</option>
                         </select>
                     </div>
 
                     <div>
                         <label style="display:block; margin-bottom:5px; font-weight:600;">Zona de Entrega (Tarifa Transporte)</label>
                         <select name="tarifa_zona" required style="width:100%; padding:10px; border-radius:6px; border:1px solid #ccc;">
+                            <!-- precios de trasnporte-->
                             <option value="30.0">Zona Norte ($30.00)</option>
                             <option value="45.0">Zona Sur ($45.00)</option>
                             <option value="25.0">Zona Centro ($25.00)</option>
@@ -134,7 +136,7 @@
                 </form>
             </div>
 
-            <!-- HISTORIAL DE PEDIDOS (FUERA DEL FORMULARIO) -->
+            <!-- HISTORIAL DE PEDIDOS  -->
             <div class="table-container" style="margin-top: 30px;">
                 <h2>Historial de Pedidos Realizados</h2>
                 <table class="data-table" style="margin-top: 15px;">
@@ -160,7 +162,7 @@
 </tbody>
                 </table>
             </div>
-        </div>
+</div>
 
 
             <!-- SECCIÓN 3: MAQUINARIA -->
@@ -235,67 +237,67 @@
         </div>
 
 
-        <!-- SECCIÓN 4: CONTROL DE PERSONAL (Tabla conectada a MySQL) -->
+        
        <!-- SECCIÓN 4: CONTROL DE PERSONAL -->
-<div id="sec-personal" class="seccion-panel" style="display: none;">
+  <div id="sec-personal" class="seccion-panel" style="display: none;">
     
-    <!-- FORMULARIO PARA AÑADIR NUEVO PERSONAL -->
-    <div class="table-container" style="margin-bottom: 25px;">
-        <h2>Añadir Nuevo Personal al Sistema</h2>
-        <form action="{{ url_for('admin.crear_usuario') }}" method="POST" style="margin-top: 15px; display: flex; flex-wrap: wrap; gap: 15px; align-items: flex-end;">
-            <div style="flex: 1; min-width: 200px;">
-                <label style="display:block; margin-bottom:5px; font-weight:600; font-size: 14px;">Nombre de Usuario</label>
-                <input type="text" name="username" required placeholder="Ej: chofer2" style="width:100%; padding:10px; border-radius:6px; border:1px solid #ccc;">
-            </div>
-            
-            <div style="flex: 1; min-width: 200px;">
-                <label style="display:block; margin-bottom:5px; font-weight:600; font-size: 14px;">Contraseña</label>
-                <input type="password" name="password" required placeholder="••••••••" style="width:100%; padding:10px; border-radius:6px; border:1px solid #ccc;">
+            <!-- FORMULARIO PARA AÑADIR NUEVO PERSONAL -->
+            <div class="table-container" style="margin-bottom: 25px;">
+                <h2>Añadir Nuevo Personal al Sistema</h2>
+                <form action="{{ url_for('admin.crear_usuario') }}" method="POST" style="margin-top: 15px; display: flex; flex-wrap: wrap; gap: 15px; align-items: flex-end;">
+                    <div style="flex: 1; min-width: 200px;">
+                        <label style="display:block; margin-bottom:5px; font-weight:600; font-size: 14px;">Nombre de Usuario</label>
+                        <input type="text" name="username" required placeholder="Ej: chofer2" style="width:100%; padding:10px; border-radius:6px; border:1px solid #ccc;">
+                    </div>
+                    
+                    <div style="flex: 1; min-width: 200px;">
+                        <label style="display:block; margin-bottom:5px; font-weight:600; font-size: 14px;">Contraseña</label>
+                        <input type="password" name="password" required placeholder="••••••••" style="width:100%; padding:10px; border-radius:6px; border:1px solid #ccc;">
+                    </div>
+
+                    <div>
+                        <button type="submit" style="background:#2ecc71; color:white; padding:11px 20px; border:none; border-radius:6px; font-weight:bold; cursor:pointer; font-size: 14px; display: flex; align-items: center; gap: 8px;">
+                            <i class="fa-solid fa-user-plus"></i> Añadir Personal
+                        </button>
+                    </div>
+                </form>
             </div>
 
-            <div>
-                <button type="submit" style="background:#2ecc71; color:white; padding:11px 20px; border:none; border-radius:6px; font-weight:bold; cursor:pointer; font-size: 14px; display: flex; align-items: center; gap: 8px;">
-                    <i class="fa-solid fa-user-plus"></i> Añadir Personal
-                </button>
-            </div>
-        </form>
-    </div>
-
-    <!-- TABLA DE PERSONAL -->
-    <div class="table-container">
-        <h2>Personal Registrado en el Sistema</h2>
-        <table class="data-table" style="margin-top: 15px;">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Nombre de Usuario</th>
-                    <th>Rol / Puesto</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for usuario in usuarios %}
-                <tr>
-                    <td>{{ usuario[0] }}</td>
-                    <td><strong>{{ usuario[1] }}</strong></td>
-                    <td>
-                        <span class="badge {% if usuario[2] == 'Administrador' %}badge-admin{% else %}badge-user{% endif %}">
-                            {{ usuario[2] }}
-                        </span>
-                    </td>
-                    <td>
-                        <form action="{{ url_for('admin.eliminar_usuario', id_usuario=usuario[0]) }}" method="POST" onsubmit="return confirm('¿Estás seguro de eliminar a este usuario?');" style="margin: 0;">
-                            <input type="hidden" name="username_eliminar" value="{{ usuario[1] }}">
-                            <button type="submit" style="background: #ff4d4d; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600;">
-                                <i class="fa-solid fa-trash"></i> Eliminar
-                            </button>
-                        </form>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+                <!-- TABLA DE PERSONAL -->
+                        <div class="table-container">
+                            <h2>Personal Registrado en el Sistema</h2>
+                            <table class="data-table" style="margin-top: 15px;">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Nombre de Usuario</th>
+                                        <th>Rol / Puesto</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for usuario in usuarios %}
+                                    <tr>
+                                        <td>{{ usuario[0] }}</td>
+                                        <td><strong>{{ usuario[1] }}</strong></td>
+                                        <td>
+                                            <span class="badge {% if usuario[2] == 'Administrador' %}badge-admin{% else %}badge-user{% endif %}">
+                                                {{ usuario[2] }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <form action="{{ url_for('admin.eliminar_usuario', id_usuario=usuario[0]) }}" method="POST" onsubmit="return confirm('¿Estás seguro de eliminar a este usuario?');" style="margin: 0;">
+                                                <input type="hidden" name="username_eliminar" value="{{ usuario[1] }}">
+                                                <button type="submit" style="background: #ff4d4d; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600;">
+                                                    <i class="fa-solid fa-trash"></i> Eliminar
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
 </div>
 
 
