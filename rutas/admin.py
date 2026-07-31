@@ -1,10 +1,11 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session
-from app import mysql  # Importación global para limpiar las funciones
+from app import mysql 
 
 admin = Blueprint('admin', __name__)
 
 @admin.route('/login', methods=['GET', 'POST'])
 def login():
+    from app import mysql
     if request.method == 'POST':
         usuario = request.form['username']
         contrasena = request.form['password']
@@ -33,6 +34,7 @@ def login():
 
 @admin.route('/dashboard')
 def dashboard():
+    from app import mysql
     if not session.get('logeado'):
         return redirect(url_for('admin.login'))
         
@@ -46,8 +48,50 @@ def dashboard():
     # Se los enviamos con el mismo nombre que usas en el bucle {% for usuario in usuarios %}
     return render_template("admin/dashboard.html", usuarios=lista_usuarios)
 
-
+# Creacion de ruta de barra lateral seccion dos en dasboard
 @admin.route('/logout')
 def logout():
     session.clear()
     return redirect(url_for('admin.login'))
+@admin.route('/crear-pedido', methods=['POST'])
+def crear_pedido():
+    from app import mysql
+    if not session.get('logeado'):
+        return redirect(url_for('admin.login'))
+    
+    # 1. Recuperar los datos del formulario HTML
+    costo_material = float(request.form.get('material', 0))
+    tarifa_zona = float(request.form.get('tarifa_zona', 0))
+    horas_retro = float(request.form.get('horas_retro', 0))
+    tarifa_hora_retro = 40.0  # Costo fijo de la retroexcavadora por hora
+
+    # 2. CAPA DE LÓGICA DE NEGOCIO (Reglas de cálculo)
+    costo_pedido = costo_material + tarifa_zona
+    
+    # Aplicar la regla de negocio: mínimo 2 horas si se utiliza maquinaria pesada
+    if horas_retro > 0:
+        horas_efectivas = max(horas_retro, 2)
+        costo_retro = horas_efectivas * tarifa_hora_retro
+    else:
+        costo_retro = 0.0
+
+    costo_total_final = costo_pedido + costo_retro
+
+    # 3. Conexión y almacenamiento en base de datos
+    cursor = mysql.connection.cursor()
+    try:
+        # Insertar pedido en tu tabla (Modifica los campos según tu base_de_datos.sql)
+        cursor.execute("""
+            INSERT INTO pedidos (costo_material, costo_transporte, costo_maquinaria, total) 
+            VALUES (%s, %s, %s, %s)
+        """, (costo_material, tarifa_zona, costo_retro, costo_total_final))
+        
+        mysql.connection.commit()
+        flash(f"¡Pedido guardado! Costo Total calculado: ${costo_total_final:.2f}", "success")
+    except Exception as e:
+        mysql.connection.rollback()
+        flash(f"Error al registrar pedido en la base de datos: {str(e)}", "error")
+    finally:
+        cursor.close()
+
+    return redirect(url_for('admin.dashboard'))

@@ -41,6 +41,9 @@
         .badge { padding: 5px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; display: inline-block; }
         .badge-admin { background: rgba(0, 114, 255, 0.1); color: #0072ff; }
         .badge-user { background: rgba(108, 108, 125, 0.1); color: #6c6c7d; }
+        .flash-message { padding: 15px; margin-bottom: 20px; border-radius: 6px; }
+        .flash-success { background-color: #d4edda; color: #155724; }
+        .flash-error { background-color: #f8d7da; color: #721c24; }
     </style>
 </head>
 <body>
@@ -66,12 +69,19 @@
         </div>
 
         <!-- SECCIÓN 1: DASHBOARD -->
+               <!-- SECCIÓN 1: DASHBOARD -->
         <div id="sec-dash" class="seccion-panel">
             <div class="cards-grid">
+                
+                <!-- ESTA ES LA TARJETA EXACTA A REEMPLAZAR -->
                 <div class="card">
-                    <div class="card-info"><h3>Pedidos Activos</h3><p>0</p></div>
+                    <div class="card-info">
+                        <h3>Pedidos Activos</h3>
+                        <p>{{ pedidos|length }}</p>
+                    </div>
                     <div class="card-icon"><i class="fa-solid fa-truck"></i></div>
                 </div>
+                
                 <div class="card">
                     <div class="card-info"><h3>Motor MySQL</h3><p>CONECTADO</p></div>
                     <div class="card-icon" style="color: #2ecc71; background: rgba(46,204,113,0.1);"><i class="fa-solid fa-database"></i></div>
@@ -83,13 +93,71 @@
             </div>
         </div>
 
-        <!-- SECCIÓN 2: PEDIDOS -->
+
+         <!-- SECCIÓN 2: PEDIDOS -->
         <div id="sec-pedidos" class="seccion-panel" style="display: none;">
             <div class="table-container">
-                <h2>Gestión de Pedidos de Materiales</h2>
-                <p style="color: #666; margin-top: 10px;">Aquí se desplegarán las solicitudes de volquetas de arena, piedra y materiales de construcción.</p>
+                <h2>Crear Nuevo Pedido de Material</h2>
+                
+                <form action="{{ url_for('admin.crear_pedido') }}" method="POST" style="margin-top: 20px; display: flex; flex-direction: column; gap: 15px; max-width: 500px;">
+                    <div>
+                        <label style="display:block; margin-bottom:5px; font-weight:600;">Tipo de Material</label>
+                        <select name="material" required style="width:100%; padding:10px; border-radius:6px; border:1px solid #ccc;">
+                            <option value="150.0">Volqueta de Arena ($150.00)</option>
+                            <option value="180.0">Volqueta de Piedra ($180.00)</option>
+                            <option value="120.0">Volqueta de Lastre ($120.00)</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label style="display:block; margin-bottom:5px; font-weight:600;">Zona de Entrega (Tarifa Transporte)</label>
+                        <select name="tarifa_zona" required style="width:100%; padding:10px; border-radius:6px; border:1px solid #ccc;">
+                            <option value="30.0">Zona Norte ($30.00)</option>
+                            <option value="45.0">Zona Sur ($45.00)</option>
+                            <option value="25.0">Zona Centro ($25.00)</option>
+                            <option value="60.0">Zona Periférica ($60.00)</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label style="display:block; margin-bottom:5px; font-weight:600;">Horas de Uso de Retroexcavadora (Opcional)</label>
+                        <input type="number" name="horas_retro" min="0" value="0" style="width:100%; padding:10px; border-radius:6px; border:1px solid #ccc;">
+                    </div>
+
+                    <button type="submit" style="background:#0072ff; color:white; padding:12px; border:none; border-radius:6px; font-weight:bold; cursor:pointer; margin-top:10px;">
+                        Calcular y Registrar Pedido
+                    </button>
+                </form>
+            </div>
+
+            <!-- HISTORIAL DE PEDIDOS (FUERA DEL FORMULARIO) -->
+            <div class="table-container" style="margin-top: 30px;">
+                <h2>Historial de Pedidos Realizados</h2>
+                <table class="data-table" style="margin-top: 15px;">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Costo Material</th>
+                            <th>Transporte</th>
+                            <th>Maquinaria</th>
+                            <th>Total Final</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for pedido in pedidos %}
+                        <tr>
+                            <td>{{ pedido[0] }}</td>
+                            <td>${{ pedido[1] }}</td>
+                            <td>${{ pedido[2] }}</td>
+                            <td>${{ pedido[3] }}</td>
+                            <td><strong>${{ pedido[4] }}</strong></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
         </div>
+
 
         <!-- SECCIÓN 3: MAQUINARIA -->
         <div id="sec-maquinaria" class="seccion-panel" style="display: none;">
