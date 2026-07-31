@@ -159,13 +159,77 @@
         </div>
 
 
-        <!-- SECCIÓN 3: MAQUINARIA -->
+            <!-- SECCIÓN 3: MAQUINARIA -->
         <div id="sec-maquinaria" class="seccion-panel" style="display: none;">
             <div class="table-container">
-                <h2>Control de Retroexcavadoras</h2>
-                <p style="color: #666; margin-top: 10px;">Módulo encargado del rastreo y asignación de maquinaria pesada a los choferes operadores.</p>
+                <h2>Control y Estado de Retroexcavadoras</h2>
+                
+                <table class="data-table" style="margin-top: 15px;">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Código de Máquina</th>
+                            <th>Tipo</th>
+                            <th>Estado Actual</th>
+                            <th>Horas de Uso Acumuladas</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                     {% for maq in maquinarias %}
+             <tr>
+        <td>{{ maq[0] }}</td> 
+        <td><strong>{{ maq[1] }}</strong></td> 
+          <td>{{ maq[2] }}</td> 
+            <td>
+                <span class="badge {% if maq[3] == 'Disponible' %}badge-admin{% else %}badge-user{% endif %}">
+                {{ maq[3] }} 
+            </span>
+          </td>
+            <td>{{ maq[4] }} hrs</td> 
+                    </tr>
+            {% endfor %}
+
+
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- FORMULARIO PARA ACTUALIZAR MAQUINARIA -->
+            <div class="table-container" style="margin-top: 25px;">
+                <h2>Registrar Reporte de Maquinaria</h2>
+                <form action="{{ url_for('admin.actualizar_maquinaria') }}" method="POST" style="margin-top: 15px; display: flex; flex-direction: column; gap: 15px; max-width: 500px;">
+                   
+                <div>
+                <label style="display:block; margin-bottom:5px; font-weight:600;">Seleccionar Máquina</label>
+                 <select name="id_maquina" required style="width:100%; padding:10px; border-radius:6px; border:1px solid #ccc;">
+                {% for maq in maquinarias %}
+                <option value="{{ maq[0] }}">{{ maq[1] }} ({{ maq[3] }})</option>
+                 {% endfor %}
+                 </select>  
+                    </div>
+
+
+                    <div>
+                        <label style="display:block; margin-bottom:5px; font-weight:600;">Nuevo Estado</label>
+                        <select name="estado" required style="width:100%; padding:10px; border-radius:6px; border:1px solid #ccc;">
+                            <option value="Disponible">Disponible</option>
+                            <option value="Ocupada">Ocupada</option>
+                            <option value="En Servicio">En Servicio (Mantenimiento)</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label style="display:block; margin-bottom:5px; font-weight:600;">Agregar Horas de Trabajo Realizadas</label>
+                        <input type="number" name="horas_nuevas" min="0" value="0" style="width:100%; padding:10px; border-radius:6px; border:1px solid #ccc;">
+                    </div>
+
+                    <button type="submit" style="background:#0072ff; color:white; padding:12px; border:none; border-radius:6px; font-weight:bold; cursor:pointer; margin-top:10px;">
+                        Guardar Reporte de Maquinaria
+                    </button>
+                </form>
             </div>
         </div>
+
 
         <!-- SECCIÓN 4: CONTROL DE PERSONAL (Tabla conectada a MySQL) -->
         <div id="sec-personal" class="seccion-panel" style="display: none;">

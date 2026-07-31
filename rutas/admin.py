@@ -1,6 +1,5 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session
 
-
 admin = Blueprint('admin', __name__)
 
 @admin.route('/login', methods=['GET', 'POST'])
@@ -39,20 +38,36 @@ def dashboard():
         return redirect(url_for('admin.login'))
         
     cursor = mysql.connection.cursor()
-    # Modificamos la consulta para devolver 'Administrador' como una tercera columna fija
-    # ya que tu tabla actual de MySQL solo tiene: id, username, password.
+    
+    # 1. Traer usuarios para la pestaña de Control Personal
     cursor.execute("SELECT id, username, 'Administrador' AS rol FROM usuarios") 
     lista_usuarios = cursor.fetchall()
+    
+    # 2. Traer pedidos para la pestaña de Pedidos Material (EVITA PANTALLA VACÍA)
+    cursor.execute("SELECT id, costo_material, costo_transporte, costo_maquinaria, total FROM pedidos ORDER BY id DESC")
+    lista_pedidos = cursor.fetchall()
+    
+    # 3. Traer maquinaria para la pestaña de Retroexcavadoras (EVITA PANTALLA VACÍA)
+    cursor.execute("SELECT id, codigo_maquina, tipo, estado, horas_totales FROM maquinaria")
+    lista_maquinaria = cursor.fetchall()
+    
     cursor.close()
     
-    # Se los enviamos con el mismo nombre que usas en el bucle {% for usuario in usuarios %}
-    return render_template("admin/dashboard.html", usuarios=lista_usuarios)
+    # Se envían todas las listas al HTML para que cada pestaña tenga sus datos listos
+    return render_template(
+        "admin/dashboard.html", 
+        usuarios=lista_usuarios, 
+        pedidos=lista_pedidos, 
+        maquinarias=lista_maquinaria
+    )
 
-# Creacion de ruta de barra lateral seccion dos en dasboard
+
 @admin.route('/logout')
 def logout():
     session.clear()
     return redirect(url_for('admin.login'))
+
+
 @admin.route('/crear-pedido', methods=['POST'])
 def crear_pedido():
     from app import mysql
@@ -80,7 +95,6 @@ def crear_pedido():
     # 3. Conexión y almacenamiento en base de datos
     cursor = mysql.connection.cursor()
     try:
-        # Insertar pedido en tu tabla (Modifica los campos según tu base_de_datos.sql)
         cursor.execute("""
             INSERT INTO pedidos (costo_material, costo_transporte, costo_maquinaria, total) 
             VALUES (%s, %s, %s, %s)
@@ -94,4 +108,34 @@ def crear_pedido():
     finally:
         cursor.close()
 
+    return redirect(url_for('admin.dashboard'))
+
+
+@admin.route('/actualizar-maquinaria', methods=['POST'])
+def actualizar_maquinaria():
+    from app import mysql
+    if not session.get('logeado'):
+        return redirect(url_for('admin.login'))
+        
+    id_maquina = request.form.get('id_maquina')
+    nuevo_estado = request.form.get('estado')
+    horas_nuevas = int(request.form.get('horas_nuevas', 0))
+    
+    cursor = mysql.connection.cursor()
+    try:
+        # Actualizamos el estado y sumamos las horas de uso acumuladas
+        cursor.execute("""
+            UPDATE maquinaria 
+            SET estado = %s, horas_totales = horas_totales + %s 
+            WHERE id = %s
+        """, (nuevo_estado, horas_nuevas, id_maquina))
+        
+        mysql.connection.commit()
+        flash("Maquinaria actualizada correctamente", "success")
+    except Exception as e:
+        mysql.connection.rollback()
+        flash(f"Error al actualizar la maquinaria: {str(e)}", "error")
+    finally:
+        cursor.close()
+        
     return redirect(url_for('admin.dashboard'))
