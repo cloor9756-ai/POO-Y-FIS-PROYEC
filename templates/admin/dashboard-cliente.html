@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MaterialGo - Panel de Cliente</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/estilos.css') }}">
+    <link rel="stylesheet" href="https://cloudflare.com">
+    <style>
+        body { margin: 0; font-family: 'Segoe UI', sans-serif; display: flex; background-color: #f4f6f9; }
+        .sidebar { width: 250px; height: 100vh; background-color: #1e1e2f; color: white; position: fixed; display: flex; flex-direction: column; justify-content: space-between; }
+        .sidebar-menu { padding: 20px; }
+        .sidebar-brand { font-size: 24px; font-weight: bold; margin-bottom: 30px; display: flex; align-items: center; gap: 10px; }
+        .menu-item { padding: 12px 15px; color: #a3a3c2; text-decoration: none; display: flex; align-items: center; gap: 10px; border-radius: 6px; margin-bottom: 5px; }
+        .menu-item:hover, .menu-item.active { background-color: #2d2d44; color: white; }
+        .logout { color: #ff4d4d; }
+        .main-content { margin-left: 250px; padding: 40px; width: calc(100% - 250px); box-sizing: border-box; }
+        .welcome-card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        
+        /* Estilos del Formulario de Pedidos */
+        .form-container { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); max-width: 600px; }
+        .form-group { margin-bottom: 20px; display: flex; flex-direction: column; gap: 8px; }
+        .form-group label { font-weight: 600; color: #4a4a6a; }
+        .form-group input { padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 16px; }
+        .btn-order { background: #0072ff; color: white; padding: 14px; border: none; border-radius: 6px; font-weight: bold; font-size: 16px; cursor: pointer; transition: background 0.3s; }
+        .btn-order:hover { background: #0056b3; }
+        
+        /* Notificaciones Flash */
+        .flash-messages { margin-bottom: 20px; }
+        .flash-success { background: #e8f5e9; color: #2ecc71; padding: 15px; border-radius: 6px; font-weight: 600; border-left: 5px solid #2ecc71; }
+        .flash-error { background: #ffebee; color: #ff4d4d; padding: 15px; border-radius: 6px; font-weight: 600; border-left: 5px solid #ff4d4d; }
+    </style>
+</head>
+<body>
+
+    <!-- BARRA LATERAL -->
+    <div class="sidebar">
+        <div class="sidebar-menu">
+            <div class="sidebar-brand">
+                <i class="fa-solid fa-hard-hat"></i> MaterialGo
+            </div>
+            <a href="#" class="menu-item active"><i class="fa-solid fa-truck-ramp-box"></i> Solicitar Pedido</a>
+            <a href="#" class="menu-item"><i class="fa-solid fa-receipt"></i> Mis Compras</a>
+        </div>
+        <div class="sidebar-menu">
+            <a href="{{ url_for('admin.enlogin') }}" class="menu-item logout"><i class="fa-solid fa-right-from-bracket"></i> Cerrar Sesión</a>
+        </div>
+    </div>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <div class="main-content">
+        
+        <!-- Notificaciones de Flask -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for category, message in messages %}
+                        <div class="flash-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <div class="welcome-card">
+            <div>
+                <h1 style="margin: 0; color: #1e1e2f;">¡Bienvenido, {{ usuario }}!</h1>
+                <p style="margin: 5px 0 0 0; color: #7a7a9a;">Genera y cotiza tus solicitudes de materiales o maquinaria pesada.</p>
+            </div>
+            <span style="background: #e8f5e9; color: #2ecc71; padding: 8px 15px; border-radius: 20px; font-weight: bold; font-size: 14px;">
+                <i class="fa-solid fa-circle-user"></i> Cuenta Cliente
+            </span>
+        </div>
+
+        <!-- FORMULARIO DE COTIZACIÓN Y REGISTRO -->
+        <div class="form-container">
+            <h2 style="margin-top: 0; margin-bottom: 25px; color: #1e1e2f;"><i class="fa-solid fa-calculator"></i> Nueva Cotización de Pedido</h2>
+            
+            <form action="{{ url_for('admin.crear_pedido') }}" method="POST">
+                <div class="form-group">
+                    <label for="material">Costo de Materiales ($)</label>
+                    <input type="number" step="0.01" name="material" id="material" placeholder="0.00" min="0" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="tarifa_zona">Tarifa de Transporte por Zona ($)</label>
+                    <input type="number" step="0.01" name="tarifa_zona" id="tarifa_zona" placeholder="0.00" min="0" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="horas_retro">Horas de Uso de Retroexcavadora (Opcional)</label>
+                    <input type="number" step="0.5" name="horas_retro" id="horas_retro" placeholder="0" min="0">
+                    <small style="color: #7a7a9a; margin-top: 2px;">* Se aplica un cobro mínimo de 2 horas si se utiliza maquinaria ($40.00/h).</small>
+                </div>
+
+                <button type="submit" class="btn-order">
+                    <i class="fa-solid fa-paper-plane"></i> Calcular y Confirmar Pedido
+                </button>
+            </form>
+        </div>
+    </div>
+
+</body>
+</html>

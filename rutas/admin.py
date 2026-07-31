@@ -9,45 +9,66 @@ def login_requerido(f):
         # Si la variable 'logeado' no existe en la sesión, los expulsa al login
         if not session.get('logeado'):
             flash('Por favor, inicia sesión para acceder al sistema.', 'error')
-            return redirect(url_for('admin.login'))
+            return redirect(url_for('admin.enlogin'))
         return f(*args, **kwargs)
     return funcion_decorada
 
 @admin.route('/login', methods=['GET', 'POST'])
-def login():
-    from app import mysql
+def enlogin():
     if request.method == 'POST':
-        usuario = request.form['username']
-        contrasena = request.form['password']
+        username = request.form.get('username')
+        password = request.form.get('password')
         
+        from app import mysql
         cursor = mysql.connection.cursor()
-        # Nota: Idealmente deberías usar contraseñas encriptadas con Werkzeug en el futuro
-        cursor.execute("SELECT * FROM usuarios WHERE username = %s AND password = %s", (usuario, contrasena))
-        cuenta = cursor.fetchone()
+        
+        # 1. Consultamos seleccionando las columnas explícitas para evitar problemas de índices
+        cursor.execute("""
+            SELECT id, username, password, rol 
+            FROM usuarios 
+            WHERE username = %s AND password = %s
+        """, (username, password))
+        
+        usuario_encontrado = cursor.fetchone()
         cursor.close()
         
-        if cuenta:
+        if usuario_encontrado:
+            # 2. Guardamos los datos de la tupla de manera segura usando strings limpios
             session['logeado'] = True
-            session['username'] = usuario
+            session['id_usuario'] = int(usuario_encontrado[0])
+            session['usuario'] = str(usuario_encontrado[1])
             
-            # Ajusta el índice según el orden de tus columnas en base_de_datos.sql
-            # Por ejemplo: id(0), username(1), password(2), email(3), tipo_usuario(4)
-            session['tipo_usuario'] = cuenta[4] if len(cuenta) > 4 else 'Administrador'
+            # Limpiamos el rol de cualquier espacio en blanco o mayúscula inesperada
+            rol_usuario = str(usuario_encontrado[3]).strip().capitalize()
+            session['rol'] = rol_usuario 
             
-            return redirect(url_for('admin.dashboard'))
+            # 3. REDIRECCIÓN COMPARANDO EL TEXTO LIMPIO
+            if rol_usuario == 'Cliente':
+                return redirect(url_for('admin.dashboard_cliente'))
+            else:
+                return redirect(url_for('admin.dashboard'))
         else:
-            flash('Usuario o contraseña incorrectos', 'error')
-            return redirect(url_for('admin.login'))
+            # 4. Alerta si las credenciales no coinciden en la base de datos
+            flash("Usuario o contraseña incorrectos. Verifica los datos en tu base de datos.", "error")
+            return redirect(url_for('admin.enlogin'))
             
-    return render_template("index.html")
+    return render_template('index.html')
 
+@admin.route('/dashboard-cliente')
+def dashboard_cliente():
+    # Protección de ruta: Validar que esté logeado y sea un cliente
+    if not session.get('logeado') or session.get('rol') != 'Cliente':
+        return redirect(url_for('admin.enlogin'))
+        
+    # Renderiza la interfaz exclusiva del cliente pasando su nombre de usuario
+    return render_template('admin/dashboard_cliente.html', usuario=session.get('usuario'))
 
 @admin.route('/dashboard')
 @login_requerido
 def dashboard():
     from app import mysql
     if not session.get('logeado'):
-        return redirect(url_for('admin.login'))
+        return redirect(url_for('admin.enlogin'))
         
     # 1. Inicializamos el cursor en None para evitar que se rompa el "finally"
     cursor = None
@@ -94,57 +115,40 @@ def dashboard():
 @admin.route('/logout')
 def logout():
     session.clear()
-    return redirect(url_for('admin.login'))
+    return redirect(url_for('admin.enlogin'))
 
 
-@admin.route('/crear-pedido', methods=['POST'])
-def crear_pedido():
+
+@admin.route('/crear-pedido', methods=['POST']) # O el nombre exacto que le diste a tu ruta de registro
+def registrar_usuario_cliente():
+    username = request.form.get('username')
+    password = request.form.get('password')
+    
     from app import mysql
-    if not session.get('logeado'):
-        return redirect(url_for('admin.login'))
-    
-    # 1. Recuperar los datos del formulario HTML
-    costo_material = float(request.form.get('material', 0))
-    tarifa_zona = float(request.form.get('tarifa_zona', 0))
-    horas_retro = float(request.form.get('horas_retro', 0))
-    tarifa_hora_retro = 40.0  # Costo fijo de la retroexcavadora por hora
-
-    # 2. CAPA DE LÓGICA DE NEGOCIO (Reglas de cálculo)
-    costo_pedido = costo_material + tarifa_zona
-    
-    # Aplicar la regla de negocio: mínimo 2 horas si se utiliza maquinaria pesada
-    if horas_retro > 0:
-        horas_efectivas = max(horas_retro, 2)
-        costo_retro = horas_efectivas * tarifa_hora_retro
-    else:
-        costo_retro = 0.0
-
-    costo_total_final = costo_pedido + costo_retro
-
-    # 3. Conexión y almacenamiento en base de datos
     cursor = mysql.connection.cursor()
     try:
+        # Forzamos que guarde el valor 'Cliente' en la columna 'rol'
         cursor.execute("""
-            INSERT INTO pedidos (costo_material, costo_transporte, costo_maquinaria, total) 
-            VALUES (%s, %s, %s, %s)
-        """, (costo_material, tarifa_zona, costo_retro, costo_total_final))
+            INSERT INTO usuarios (username, password, rol) 
+            VALUES (%s, %s, %s)
+        """, (username, password, 'Cliente'))
         
         mysql.connection.commit()
-        flash(f"¡Pedido guardado! Costo Total calculado: ${costo_total_final:.2f}", "success")
+        flash("¡Registro exitoso como Cliente!", "success")
     except Exception as e:
         mysql.connection.rollback()
-        flash(f"Error al registrar pedido en la base de datos: {str(e)}", "error")
+        flash(f"Error al registrar: {str(e)}", "error")
     finally:
         cursor.close()
-
-    return redirect(url_for('admin.dashboard'))
+        
+    return redirect(url_for('admin.enlogin'))
 
 
 @admin.route('/actualizar-maquinaria', methods=['POST'])
 def actualizar_maquinaria():
     from app import mysql
     if not session.get('logeado'):
-        return redirect(url_for('admin.login'))
+        return redirect(url_for('admin.enlogin'))
         
     id_maquina = request.form.get('id_maquina')
     nuevo_estado = request.form.get('estado')
@@ -196,7 +200,7 @@ def eliminar_usuario(id_usuario):
 def crear_usuario():
     from app import mysql
     if not session.get('logeado'):
-        return redirect(url_for('admin.login'))
+        return redirect(url_for('admin.enlogin'))
         
     nuevo_usuario = request.form.get('username')
     nueva_contrasena = request.form.get('password')
@@ -234,7 +238,7 @@ def crear_usuario():
     def crear_usuario():
         from app import mysql
     if not session.get('logeado'):
-        return redirect(url_for('admin.login'))
+        return redirect(url_for('admin.enlogin'))
         
     # 1. INICIALIZAMOS EN NONE PARA EVITAR EL ERROR DE LA CAPTURA
     cursor = None 
@@ -271,3 +275,43 @@ def crear_usuario():
             cursor.close()
             
     return redirect(url_for('admin.dashboard'))
+
+
+    @admin.route('/registrar-cliente', methods=['POST'])
+    def registrar_cliente():
+        from app import mysql
+    
+    usuario = request.form.get('username')
+    contrasena = request.form.get('password')
+    direccion = request.form.get('direccion')
+    
+    if not usuario or not contrasena or not direccion:
+        flash("Todos los campos son obligatorios para el registro", "error")
+        return redirect(url_for('admin.enlogin'))
+        
+    cursor = mysql.connection.cursor()
+    try:
+        # Validación: Verificar que el cliente no exista ya
+        cursor.execute("SELECT id FROM usuarios WHERE username = %s", (usuario,))
+        if cursor.fetchone():
+            flash("El nombre de usuario ya está en uso", "error")
+            return redirect(url_for('admin.enlogin'))
+            
+        # Insertar con rol 'Cliente' automático y guardando su dirección (Historia 001)
+        cursor.execute("""
+            INSERT INTO usuarios (username, password, rol, direccion) 
+            VALUES (%s, %s, 'Cliente', %s)
+        """, (usuario, contrasena, direccion))
+        
+        mysql.connection.commit()
+        flash("¡Registro exitoso! Ya puedes iniciar sesión.", "success")
+    except Exception as e:
+        mysql.connection.rollback()
+        flash(f"Error al registrar cliente: {str(e)}", "error")
+    finally:
+        if cursor:
+            cursor.close()
+            
+    return redirect(url_for('admin.enlogin'))
+
+

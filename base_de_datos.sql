@@ -36,6 +36,7 @@ INSERT INTO maquinaria (codigo_maquina, tipo, estado, horas_totales) VALUES
 ('RETRO-01', 'Retroexcavadora', 'Disponible', 120),
 ('RETRO-02', 'Retroexcavadora', 'En Servicio', 340);
 
+rol VARCHAR(50) DEFAULT "Administrador"
 
 CREATE TABLE usuarios (
     id INT AUTO_INCREMENT PRIMARY KEY,
