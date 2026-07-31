@@ -16,7 +16,10 @@ app.config['MYSQL_DB'] = 'proyecto_fis_poo'
 mysql = MySQL(app)
 
 # 2. Registramos el blueprint DESPUÉS de inicializar mysql
+# Modificación en la línea 19 para compartir la base de datos con el módulo de administración
+admin.mysql = mysql 
 app.register_blueprint(admin)
+
 
 if __name__ == '__main__':
     app.run(debug=True)

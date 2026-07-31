@@ -130,30 +130,31 @@
 
     </div>
 
-    <!-- Script de navegación interactiva sin recarga de página -->
+      <!-- Script de navegación interactiva sin recarga de página completo -->
     <script>
         function cambiarSeccion(idSeccion, botonActivo) {
-            // Ocultar todas las secciones
+            // 1. Ocultar todas las secciones
             const secciones = document.querySelectorAll('.seccion-panel');
             secciones.forEach(sec => sec.style.display = 'none');
             
-            // Mostrar la sección seleccionada
+            // 2. Mostrar la sección seleccionada
             document.getElementById(idSeccion).style.display = 'block';
             
-            // Cambiar dinámicamente el título superior según la sección para mejorar la experiencia
-            const titulos = {
-                'sec-dash': 'Panel de Control Principal',
-                'sec-pedidos': 'Módulo de Pedidos',
-                'sec-maquinaria': 'Gestión de Maquinaria Pesada',
-                'sec-personal': 'Control Interno de Personal'
-            };
-            document.getElementById('titulo-panel').innerText = titulos[idSeccion];
+            // 3. Quitar la clase activa de todos los botones del menú
+            const itemsMenu = document.querySelectorAll('.menu-item');
+            itemsMenu.forEach(item => item.classList.remove('active'));
             
-            // Actualizar estilo visual del menú lateral
-            const botones = document.querySelectorAll('.menu-item');
-            botones.forEach(btn => btn.classList.remove('active'));
+            // 4. Agregar la clase activa al botón presionado
             botonActivo.classList.add('active');
+
+            // 5. Cambiar el título superior dinámicamente según la sección
+            const titulo = document.getElementById('titulo-panel');
+            if (idSeccion === 'sec-dash') titulo.innerText = 'Panel de Control Principal';
+            if (idSeccion === 'sec-pedidos') titulo.innerText = 'Gestión de Pedidos de Materiales';
+            if (idSeccion === 'sec-maquinaria') titulo.innerText = 'Control de Retroexcavadoras';
+            if (idSeccion === 'sec-personal') titulo.innerText = 'Personal Registrado en el Sistema';
         }
     </script>
 </body>
 </html>
+
