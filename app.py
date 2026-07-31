@@ -9,10 +9,8 @@ app.config['MYSQL_USER'] = 'root'
 app.config['MYSQL_PASSWORD'] = ''
 app.config['MYSQL_DB'] = 'proyecto_fis_poo'
 
-# 1. Inicialización correcta con Mayúscula
 mysql = MySQL(app)
 
-# 2. Importación del módulo de rutas
 from rutas.admin import admin
 app.register_blueprint(admin)
 
