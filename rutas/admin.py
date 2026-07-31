@@ -56,7 +56,7 @@ def dashboard():
         cursor = mysql.connection.cursor()
         
         # 2. Traer usuarios (Si te da error aquí, verifica que tu tabla 'usuarios' tenga la columna 'rol')
-        cursor.execute("SELECT id, username, rol FROM usuarios") 
+        cursor.execute("SELECT id, username, rol FROM usuarios")
         lista_usuarios = cursor.fetchall()
         
         # 3. Traer pedidos
