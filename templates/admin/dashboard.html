@@ -245,14 +245,24 @@
             <div class="table-container" style="margin-bottom: 25px;">
                 <h2>Añadir Nuevo Personal al Sistema</h2>
                 <form action="{{ url_for('admin.crear_usuario') }}" method="POST" style="margin-top: 15px; display: flex; flex-wrap: wrap; gap: 15px; align-items: flex-end;">
-                    <div style="flex: 1; min-width: 200px;">
+                    <div style="flex: 1; min-width: 150px;">
                         <label style="display:block; margin-bottom:5px; font-weight:600; font-size: 14px;">Nombre de Usuario</label>
-                        <input type="text" name="username" required placeholder="Ej: chofer2" style="width:100%; padding:10px; border-radius:6px; border:1px solid #ccc;">
+                        <input type="text" name="username" required placeholder="Ej: carlos_chofer" style="width:100%; padding:10px; border-radius:6px; border:1px solid #ccc;">
                     </div>
                     
-                    <div style="flex: 1; min-width: 200px;">
+                    <div style="flex: 1; min-width: 150px;">
                         <label style="display:block; margin-bottom:5px; font-weight:600; font-size: 14px;">Contraseña</label>
                         <input type="password" name="password" required placeholder="••••••••" style="width:100%; padding:10px; border-radius:6px; border:1px solid #ccc;">
+                    </div>
+
+                    <!-- ESTO ES LO NUEVO: Selector alineado a las clases del diagrama -->
+                    <div style="flex: 1; min-width: 180px;">
+                        <label style="display:block; margin-bottom:5px; font-weight:600; font-size: 14px;">Tipo de Personal (Rol)</label>
+                        <select name="rol" required style="width:100%; padding:10px; border-radius:6px; border:1px solid #ccc;">
+                            <option value="Administrador">Administrador</option>
+                            <option value="Chofer">Chofer (Conduce Volqueta)</option>
+                            <option value="OperadorRetro">Operador de Retroexcavadora</option>
+                        </select>
                     </div>
 
                     <div>
@@ -261,8 +271,6 @@
                         </button>
                     </div>
                 </form>
-            </div>
-
                 <!-- TABLA DE PERSONAL -->
                         <div class="table-container">
                             <h2>Personal Registrado en el Sistema</h2>

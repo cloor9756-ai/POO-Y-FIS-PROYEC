@@ -35,3 +35,11 @@ CREATE TABLE maquinaria (
 INSERT INTO maquinaria (codigo_maquina, tipo, estado, horas_totales) VALUES 
 ('RETRO-01', 'Retroexcavadora', 'Disponible', 120),
 ('RETRO-02', 'Retroexcavadora', 'En Servicio', 340);
+
+
+CREATE TABLE usuarios (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    rol VARCHAR(50) DEFAULT 'Administrador'
+);

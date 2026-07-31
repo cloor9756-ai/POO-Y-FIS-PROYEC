@@ -46,33 +46,49 @@ def login():
 @login_requerido
 def dashboard():
     from app import mysql
-    # Si no está logeado, el decorador ya redirige, pero por seguridad comprobamos
     if not session.get('logeado'):
         return redirect(url_for('admin.login'))
-
-    cursor = mysql.connection.cursor()
+        
+    # 1. Inicializamos el cursor en None para evitar que se rompa el "finally"
+    cursor = None
+    
     try:
-        # 1. Traer usuarios para la pestaña de Control Personal
-        cursor.execute("SELECT id, username, 'Administrador' AS rol FROM usuarios")
+        cursor = mysql.connection.cursor()
+        
+        # 2. Traer usuarios (Si te da error aquí, verifica que tu tabla 'usuarios' tenga la columna 'rol')
+        cursor.execute("SELECT id, username, rol FROM usuarios") 
         lista_usuarios = cursor.fetchall()
-
-        # 2. Traer pedidos para la pestaña de Pedidos Material (EVITA PANTALLA VACÍA)
+        
+        # 3. Traer pedidos
         cursor.execute("SELECT id, costo_material, costo_transporte, costo_maquinaria, total FROM pedidos ORDER BY id DESC")
         lista_pedidos = cursor.fetchall()
-
-        # 3. Traer maquinaria para la pestaña de Retroexcavadoras (EVITA PANTALLA VACÍA)
+        
+        # 4. Traer maquinaria
         cursor.execute("SELECT id, codigo_maquina, tipo, estado, horas_totales FROM maquinaria")
         lista_maquinaria = cursor.fetchall()
-    finally:
+        
+        # Si todo sale bien, cerramos aquí mismo de forma segura
         cursor.close()
+        cursor = None # Lo volvemos None para que el finally no intente duplicar el cierre
+        
+        return render_template(
+            "admin/dashboard.html", 
+            usuarios=lista_usuarios, 
+            pedidos=lista_pedidos, 
+            maquinarias=lista_maquinaria
+        )
+        
+    except Exception as e:
+        # Si algo falla (como que no encuentre la columna 'rol'), te mandará este mensaje limpio
+        flash(f"Error en la base de datos dentro del Dashboard: {str(e)}", "error")
+        # Retornamos la plantilla con listas vacías para que la interfaz cargue y no se quede congelada
+        return render_template("admin/dashboard.html", usuarios=[], pedidos=[], maquinarias=[])
+        
+    finally:
+        # 5. Protección definitiva: solo cierra si el cursor se logró crear y sigue abierto
+        if cursor is not None and cursor:
+            cursor.close()
 
-    # Se envían todas las listas al HTML para que cada pestaña tenga sus datos listos
-    return render_template(
-        "admin/dashboard.html",
-        usuarios=lista_usuarios,
-        pedidos=lista_pedidos,
-        maquinarias=lista_maquinaria
-    )
 
 
 @admin.route('/logout')
@@ -211,4 +227,47 @@ def crear_usuario():
     finally:
         cursor.close()
         
+    return redirect(url_for('admin.dashboard'))
+
+    #AQUI SE CRA EL USUARIO
+    @admin.route('/crear-usuario', methods=['POST'])
+    def crear_usuario():
+        from app import mysql
+    if not session.get('logeado'):
+        return redirect(url_for('admin.login'))
+        
+    # 1. INICIALIZAMOS EN NONE PARA EVITAR EL ERROR DE LA CAPTURA
+    cursor = None 
+    
+    nuevo_usuario = request.form.get('username')
+    nueva_contrasena = request.form.get('password')
+    rol_seleccionado = request.form.get('rol')
+    
+    try:
+        # Aquí es donde realmente se le asigna un valor a la variable
+        cursor = mysql.connection.cursor()
+        
+        cursor.execute("SELECT id FROM usuarios WHERE username = %s", (nuevo_usuario,))
+        if cursor.fetchone():
+            flash("El nombre de usuario ya se encuentra registrado", "error")
+            return redirect(url_for('admin.dashboard'))
+            
+        cursor.execute("""
+            INSERT INTO usuarios (username, password, rol) 
+            VALUES (%s, %s, %s)
+        """, (nuevo_usuario, nueva_contrasena, rol_seleccionado))
+        
+        mysql.connection.commit()
+        flash(f"Usuario registrado con éxito", "success")
+        
+    except Exception as e:
+        if cursor:
+            mysql.connection.rollback()
+        flash(f"Error al registrar: {str(e)}", "error")
+        
+    finally:
+        # 2. SOLO SE CIERRA SI EL CURSOR EXISTE Y NO ES NONE
+        if cursor is not None and cursor: 
+            cursor.close()
+            
     return redirect(url_for('admin.dashboard'))
