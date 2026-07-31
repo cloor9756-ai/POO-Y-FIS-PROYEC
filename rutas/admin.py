@@ -1,6 +1,17 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session
 
 admin = Blueprint('admin', __name__)
+from functools import wraps
+
+def login_requerido(f):
+    @wraps(f)
+    def funcion_decorada(*args, **kwargs):
+        # Si la variable 'logeado' no existe en la sesión, los expulsa al login
+        if not session.get('logeado'):
+            flash('Por favor, inicia sesión para acceder al sistema.', 'error')
+            return redirect(url_for('admin.login'))
+        return f(*args, **kwargs)
+    return funcion_decorada
 
 @admin.route('/login', methods=['GET', 'POST'])
 def login():
@@ -32,32 +43,34 @@ def login():
 
 
 @admin.route('/dashboard')
+@login_requerido
 def dashboard():
     from app import mysql
+    # Si no está logeado, el decorador ya redirige, pero por seguridad comprobamos
     if not session.get('logeado'):
         return redirect(url_for('admin.login'))
-        
+
     cursor = mysql.connection.cursor()
-    
-    # 1. Traer usuarios para la pestaña de Control Personal
-    cursor.execute("SELECT id, username, 'Administrador' AS rol FROM usuarios") 
-    lista_usuarios = cursor.fetchall()
-    
-    # 2. Traer pedidos para la pestaña de Pedidos Material (EVITA PANTALLA VACÍA)
-    cursor.execute("SELECT id, costo_material, costo_transporte, costo_maquinaria, total FROM pedidos ORDER BY id DESC")
-    lista_pedidos = cursor.fetchall()
-    
-    # 3. Traer maquinaria para la pestaña de Retroexcavadoras (EVITA PANTALLA VACÍA)
-    cursor.execute("SELECT id, codigo_maquina, tipo, estado, horas_totales FROM maquinaria")
-    lista_maquinaria = cursor.fetchall()
-    
-    cursor.close()
-    
+    try:
+        # 1. Traer usuarios para la pestaña de Control Personal
+        cursor.execute("SELECT id, username, 'Administrador' AS rol FROM usuarios")
+        lista_usuarios = cursor.fetchall()
+
+        # 2. Traer pedidos para la pestaña de Pedidos Material (EVITA PANTALLA VACÍA)
+        cursor.execute("SELECT id, costo_material, costo_transporte, costo_maquinaria, total FROM pedidos ORDER BY id DESC")
+        lista_pedidos = cursor.fetchall()
+
+        # 3. Traer maquinaria para la pestaña de Retroexcavadoras (EVITA PANTALLA VACÍA)
+        cursor.execute("SELECT id, codigo_maquina, tipo, estado, horas_totales FROM maquinaria")
+        lista_maquinaria = cursor.fetchall()
+    finally:
+        cursor.close()
+
     # Se envían todas las listas al HTML para que cada pestaña tenga sus datos listos
     return render_template(
-        "admin/dashboard.html", 
-        usuarios=lista_usuarios, 
-        pedidos=lista_pedidos, 
+        "admin/dashboard.html",
+        usuarios=lista_usuarios,
+        pedidos=lista_pedidos,
         maquinarias=lista_maquinaria
     )
 
@@ -135,6 +148,66 @@ def actualizar_maquinaria():
     except Exception as e:
         mysql.connection.rollback()
         flash(f"Error al actualizar la maquinaria: {str(e)}", "error")
+    finally:
+        cursor.close()
+        
+    return redirect(url_for('admin.dashboard'))
+
+#ELIMINAR USUARIOS 
+@admin.route('/eliminar-usuario/<int:id_usuario>', methods=['POST'])
+@login_requerido
+def eliminar_usuario(id_usuario):
+    from app import mysql
+    # Regla de negocio: Evitar que el administrador se elimine a sí mismo
+    if session.get('username') == request.form.get('username_eliminar'):
+        flash('No puedes eliminar tu propia cuenta de usuario en sesión.', 'error')
+        return redirect(url_for('admin.dashboard'))
+
+    cursor = mysql.connection.cursor()
+    try:
+        cursor.execute("DELETE FROM usuarios WHERE id = %s", (id_usuario,))
+        mysql.connection.commit()
+        flash('Usuario eliminado del sistema correctamente.', 'success')
+    except Exception as e:
+        mysql.connection.rollback()
+        flash(f'Error al eliminar el usuario: {str(e)}', 'error')
+    finally:
+        cursor.close()
+        
+    return redirect(url_for('admin.dashboard'))
+#AÑADIR USUSRAIOS
+@admin.route('/crear-usuario', methods=['POST'])
+def crear_usuario():
+    from app import mysql
+    if not session.get('logeado'):
+        return redirect(url_for('admin.login'))
+        
+    nuevo_usuario = request.form.get('username')
+    nueva_contrasena = request.form.get('password')
+    
+    if not nuevo_usuario or not nueva_contrasena:
+        flash("Todos los campos son obligatorios", "error")
+        return redirect(url_for('admin.dashboard'))
+        
+    cursor = mysql.connection.cursor()
+    try:
+        # Validación extra: Verificar que el nombre de usuario no esté repetido
+        cursor.execute("SELECT id FROM usuarios WHERE username = %s", (nuevo_usuario,))
+        if cursor.fetchone():
+            flash("El nombre de usuario ya se encuentra registrado", "error")
+            return redirect(url_for('admin.dashboard'))
+            
+        # Inserción en la base de datos (Estructura: username, password)
+        cursor.execute("""
+            INSERT INTO usuarios (username, password) 
+            VALUES (%s, %s)
+        """, (nuevo_usuario, nueva_contrasena))
+        
+        mysql.connection.commit()
+        flash(f"Usuario '{nuevo_usuario}' registrado con éxito", "success")
+    except Exception as e:
+        mysql.connection.rollback()
+        flash(f"Error al registrar el usuario: {str(e)}", "error")
     finally:
         cursor.close()
         
