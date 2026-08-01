@@ -117,28 +117,45 @@ def logout():
     return redirect(url_for('admin.enlogin'))
 
 @admin.route('/crear-pedido', methods=['POST'])
-def registrar_usuario_cliente():
-    username = request.form.get('username')
-    password = request.form.get('password')
+def crear_pedido():
+    # 1. Validamos que el cliente haya iniciado sesión de forma correcta
+    if not session.get('logeado'):
+        return redirect(url_for('admin.enlogin'))
+        
+    # 2. Capturamos los datos enviados por los menús desplegables y el input numérico
+    costo_material = float(request.form.get('material', 0))
+    costo_transporte = float(request.form.get('tarifa_zona', 0))
+    horas_retro = float(request.form.get('horas_retro') or 0)
     
+    # 3. Aplicamos la regla de negocio para el costo de maquinaria
+    costo_maquinaria = 0.0
+    if horas_retro > 0:
+        if horas_retro < 2:
+            horas_retro = 2.0  # Cobro mínimo establecido
+        costo_maquinaria = horas_retro * 40.0
+        
+    # 4. Calculamos el monto total final de la cotización
+    total_final = costo_material + costo_transporte + costo_maquinaria
+    
+    # 5. Insertamos de forma segura los valores en la base de datos
     from app import mysql
     cursor = mysql.connection.cursor()
     try:
-        # Forzamos que guarde el valor 'Cliente' en la columna 'rol'
         cursor.execute("""
-            INSERT INTO usuarios (username, password, rol) 
-            VALUES (%s, %s, %s)
-        """, (username, password, 'Cliente'))
+            INSERT INTO pedidos (costo_material, costo_transporte, costo_maquinaria, total) 
+            VALUES (%s, %s, %s, %s)
+        """, (costo_material, costo_transporte, costo_maquinaria, total_final))
         
         mysql.connection.commit()
-        flash("¡Registro exitoso como Cliente!", "success")
+        flash("¡Tu cotización y pedido han sido procesados con éxito!", "success")
     except Exception as e:
         mysql.connection.rollback()
-        flash(f"Error al registrar: {str(e)}", "error")
+        flash(f"Error al procesar el pedido en el sistema: {str(e)}", "error")
     finally:
         cursor.close()
         
-    return redirect(url_for('admin.enlogin'))
+    return redirect(url_for('admin.dashboard_cliente'))
+
 
 @admin.route('/actualizar-maquinaria', methods=['POST'])
 def actualizar_maquinaria():

@@ -205,8 +205,8 @@
         }
     </style>
 </head>
-<body>
 
+<body>
     <!-- BARRA LATERAL -->
     <div class="sidebar">
         <div class="sidebar-menu">
@@ -215,7 +215,7 @@
             </div>
                 <a href="#" id="btn-pedido" class="menu-item active" onclick="cambiarSeccionCliente('sec-pedido', this)"><i class="fa-solid fa-truck-ramp-box"></i> Solicitar Pedido</a>
                 <a href="#" id="btn-compras" class="menu-item" onclick="cambiarSeccionCliente('sec-compras', this)"><i class="fa-solid fa-receipt"></i> Mis Compras</a>
-        </div>
+            </div>
 
         <div class="sidebar-menu">
             <a href="{{ url_for('admin.logout') }}" class="menu-item logout"><i class="fa-solid fa-right-from-bracket"></i> Cerrar Sesión</a>
@@ -254,7 +254,7 @@
             <div class="form-container">
                 <h2 style="margin-top: 0; margin-bottom: 25px; color: #ffffff; font-size: 20px; font-weight: 600;"><i class="fa-solid fa-calculator" style="color: #00c6ff; margin-right: 5px;"></i> Nueva Cotización de Pedido</h2>
                  <!-- CAMPO 1: MENÚ DESPLEGABLE DE MATERIALES -->
-                <form action="{{ url_for('admin.registrar_usuario_cliente') }}" method="POST">
+                <form action="{{ url_for('admin.crear_pedido') }}" method="POST">
                     <div class="form-group">
                         <label for="material">Seleccionar Tipo de Material</label>
                         <select name="material" id="material" required>
