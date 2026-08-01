@@ -13,6 +13,21 @@
 
     <div style="background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: 400px; margin: auto; margin-top: 10%; font-family: 'Segoe UI', sans-serif;">
         
+                <!-- BLOQUE DE NOTIFICACIONES FLASH DE FLASK -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <div id="flash-container" style="margin-bottom: 20px;">
+              {% for category, message in messages %}
+                <!-- Usamos la categoría directamente como clase CSS -->
+                <div class="flash-message alert-{{ category }}">
+                  {% if category == 'error' %}⚠️{% else %}✅{% endif %} {{ message }}
+                </div>
+              {% endfor %}
+            </div>
+          {% endif %}
+        {% endwith %}
+
+
         <!-- FORMULARIO DE INICIO DE SESIÓN -->
         <div id="form-login">
             <h2 style="margin-bottom: 20px; color: #1e1e2f; text-align: center;">Iniciar Sesión</h2>
@@ -27,8 +42,7 @@
         <!-- FORMULARIO DE REGISTRO DE CLIENTES -->
         <div id="form-registro" style="display: none;">
             <h2 style="margin-bottom: 20px; color: #2ecc71; text-align: center;">Registro de Cliente</h2>
-            <!-- BUSCA EL FORMULARIO DE REGISTRO DE CLIENTE Y CAMBIA EL ACTION -->
-                <form action="{{ url_for('admin.crear_usuario') }}" method="POST" style="display: flex; flex-direction: column; gap: 15px;">
+            <form action="{{ url_for('admin.crear_usuario') }}" method="POST" style="display: flex; flex-direction: column; gap: 15px;">
                 <input type="text" name="username" required placeholder="Crea tu Usuario" style="padding: 10px; border-radius: 6px; border: 1px solid #ccc;">
                 <input type="password" name="password" required placeholder="Crea tu Contraseña" style="padding: 10px; border-radius: 6px; border: 1px solid #ccc;">
                 <textarea name="direccion" required placeholder="Dirección de Entrega Completa" rows="3" style="padding: 10px; border-radius: 6px; border: 1px solid #ccc; resize: none;"></textarea>
@@ -39,7 +53,7 @@
 
     </div>
 
-    <!-- Script interactivo para cambiar entre Login y Registro -->
+    <!-- Script interactivo para cambiar formularios y desaparecer alertas automáticas -->
     <script>
     function alternarFormularios() {
         const login = document.getElementById('form-login');
@@ -52,6 +66,19 @@
             registro.style.display = 'block';
         }
     }
+
+    // Ocultar automáticamente los mensajes flash después de 4 segundos
+    window.addEventListener('DOMContentLoaded', () => {
+        const flashContainer = document.getElementById('flash-container');
+        if (flashContainer) {
+            setTimeout(() => {
+                flashContainer.style.opacity = '0';
+                setTimeout(() => {
+                    flashContainer.remove();
+                }, 500); // Espera a que termine la animación de desvanecimiento
+            }, 4000); // 4000 milisegundos = 4 segundos en pantalla
+        }
+    });
     </script>
 
 </body>

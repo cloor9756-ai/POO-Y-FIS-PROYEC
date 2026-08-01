@@ -4,55 +4,164 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PCH - Panel de Control</title>
+    <!-- Vinculación con tus estilos globales -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/estilos.css') }}">
+    <!-- Iconos externos FontAwesome -->
     <link rel="stylesheet" href="https://cloudflare.com">
-    <style>
+    
+        <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-        body { display: flex; min-height: 100vh; background-color: #f4f6f9; color: #333; }
         
-        /* Menú Lateral */
-        .sidebar { width: 260px; background-color: #1e1e2f; color: #fff; padding: 20px; display: flex; flex-direction: column; }
-        .sidebar h2 { font-size: 22px; text-align: center; margin-bottom: 30px; color: #00c6ff; font-weight: 700; letter-spacing: 0.5px; }
-        .menu-item { display: flex; align-items: center; gap: 15px; color: #b3b3b3; padding: 12px 15px; text-decoration: none; border-radius: 8px; margin-bottom: 8px; transition: all 0.3s; cursor: pointer; }
-        .menu-item:hover, .menu-item.active { background-color: rgba(255,255,255,0.05); color: #fff; }
+        /* Forzamos al body a comportarse como un contenedor de panel y no como el login */
+        body { 
+            display: flex !important; 
+            justify-content: flex-start !important; 
+            align-items: flex-start !important; 
+            background: linear-gradient(135deg, #1e1e2f 0%, #111119 100%) !important; 
+            color: #ffffff; 
+            min-height: 100vh;
+            width: 100vw;
+            overflow-x: hidden;
+        }
+        
+        /* Menú Lateral Fijo a la izquierda */
+        .sidebar { 
+            width: 260px; 
+            background-color: rgba(20, 20, 30, 0.85); 
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(12px);
+            padding: 20px; 
+            display: flex; 
+            flex-direction: column; 
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            z-index: 100;
+        }
+        .sidebar h2 { font-size: 22px; text-align: center; color: #00c6ff; font-weight: 700; letter-spacing: 0.5px; }
+        
+        .menu-item { 
+            display: flex; 
+            align-items: center; 
+            gap: 15px; 
+            color: #8f8f9d; 
+            padding: 12px 15px; 
+            text-decoration: none; 
+            border-radius: 8px; 
+            margin-bottom: 8px; 
+            transition: all 0.3s; 
+            cursor: pointer; 
+            font-size: 14px;
+            font-weight: 500;
+        }
+        .menu-item:hover, .menu-item.active { 
+            background-color: rgba(255, 255, 255, 0.05); 
+            color: #00c6ff; 
+        }
         .menu-item.active { border-left: 4px solid #0072ff; }
-        .logout { margin-top: auto; color: #ff4d4d; }
-        .logout:hover { background-color: rgba(255, 77, 77, 0.1); }
+        
+        .logout { margin-top: auto; color: #ff6b6b; }
+        .logout:hover { background-color: rgba(220, 53, 69, 0.1); color: #ff4d4d; }
 
-        /* Contenido Principal */
-        .main-content { flex: 1; padding: 40px; display: flex; flex-direction: column; gap: 25px; }
-        .header { background: #fff; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); display: flex; justify-content: space-between; align-items: center; }
-        .header h1 { font-size: 24px; color: #222; }
-        .user-info { display: flex; align-items: center; gap: 10px; font-weight: 500; }
+        /* Contenido Principal desplazado 260px para no quedar oculto detrás de la barra */
+        .main-content { 
+            flex: 1; 
+            margin-left: 260px; 
+            padding: 40px; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 25px; 
+            width: calc(100% - 260px);
+            box-sizing: border-box;
+        }
+        
+        .header { 
+            background: rgba(255, 255, 255, 0.03); 
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            backdrop-filter: blur(12px);
+            padding: 20px 30px; 
+            border-radius: 12px; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2); 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            width: 100%;
+        }
+        .header h1 { 
+            font-size: 22px; 
+            background: linear-gradient(90deg, #ffffff 0%, #dcdced 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .user-info { display: flex; align-items: center; gap: 10px; font-weight: 500; color: #8f8f9d; }
         
         /* Tarjetas de estado */
-        .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; }
-        .card { background: #fff; padding: 25px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); display: flex; align-items: center; justify-content: space-between; }
-        .card-info h3 { font-size: 14px; color: #888; text-transform: uppercase; margin-bottom: 5px; }
-        .card-info p { font-size: 28px; font-weight: 700; color: #222; }
-        .card-icon { font-size: 32px; color: #0072ff; background: rgba(0,114,255,0.1); padding: 12px; border-radius: 50px; }
+        .cards-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); 
+            gap: 20px; 
+            width: 100%;
+        }
+        .card { 
+            background: rgba(255, 255, 255, 0.02); 
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 25px; 
+            border-radius: 12px; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15); 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between; 
+        }
+        .card-info h3 { font-size: 12px; color: #8f8f9d; text-transform: uppercase; margin-bottom: 5px; letter-spacing: 0.5px; }
+        .card-info p { font-size: 28px; font-weight: 700; color: #ffffff; }
+        .card-icon { font-size: 28px; color: #00c6ff; background: rgba(0,198,255,0.1); padding: 12px; border-radius: 50px; }
 
-        /* Estilos de la tabla de datos */
-        .table-container { background: #fff; padding: 25px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); margin-top: 10px; }
-        .table-container h2 { font-size: 18px; margin-bottom: 20px; color: #222; font-weight: 600; }
+        /* Estilos de las secciones y tablas */
+        .table-container { 
+            background: rgba(255, 255, 255, 0.02); 
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 30px; 
+            border-radius: 14px; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15); 
+            width: 100%;
+        }
+        .table-container h2 { font-size: 18px; margin-bottom: 20px; color: #00c6ff; font-weight: 600; }
+        
         .data-table { width: 100%; border-collapse: collapse; text-align: left; }
-        .data-table th, .data-table td { padding: 14px 16px; border-bottom: 1px solid #edf2f7; font-size: 15px; }
-        .data-table th { background-color: #f8fafc; color: #4a5568; font-weight: 600; text-transform: uppercase; font-size: 12px; letter-spacing: 0.5px; }
-        .data-table tr:hover { background-color: #fcfdfe; }
-        .badge { padding: 5px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; display: inline-block; }
-        .badge-admin { background: rgba(0, 114, 255, 0.1); color: #0072ff; }
-        .badge-user { background: rgba(108, 108, 125, 0.1); color: #6c6c7d; }
-        .flash-message { padding: 15px; margin-bottom: 20px; border-radius: 6px; }
-        .flash-success { background-color: #d4edda; color: #155724; }
-        .flash-error { background-color: #f8d7da; color: #721c24; }
+        .data-table th, .data-table td { padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 14px; }
+        .data-table th { background-color: rgba(255, 255, 255, 0.02); color: #8f8f9d; font-weight: 600; text-transform: uppercase; font-size: 11px; letter-spacing: 0.8px; }
+        .data-table tr:hover { background-color: rgba(255,255,255,0.01); }
+        
+        label { color: #b3b3b3; font-size: 14px; }
+        select, input[type="number"], input[type="text"], input[type="password"] {
+            width: 100%; padding: 12px; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08); 
+            border-radius: 6px; color: white; outline: none; transition: border 0.3s;
+        }
+        select:focus, input:focus { border-color: #0072ff; box-shadow: 0 0 8px rgba(0,114,255,0.2); }
+        select option { background-color: #1e1e2f; color: white; }
+
+        .btn-submit-panel {
+            background: linear-gradient(90deg, #0072ff 0%, #00c6ff 100%); border: none; color: white;
+            padding: 12px 24px; border-radius: 6px; font-weight: 600; cursor: pointer; transition: all 0.3s;
+        }
+        .btn-submit-panel:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0, 198, 255, 0.3); }
+
+        .badge { padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; display: inline-block; }
+        .badge-admin { background: rgba(0, 114, 255, 0.1); color: #0072ff; border: 1px solid rgba(0, 114, 255, 0.2); }
+        .badge-user { background: rgba(46, 204, 113, 0.1); color: #2ecc71; border: 1px solid rgba(46, 204, 113, 0.2); }
+        
+        .btn-delete { background: rgba(220, 53, 69, 0.1); color: #ff6b6b; border: 1px solid rgba(220, 53, 69, 0.2); padding: 6px 12px; border-radius: 6px; cursor: pointer; }
+        .btn-delete:hover { background: #dc3545; color: white; }
     </style>
+
 </head>
 <body>
 
     <!-- Barra Lateral Única -->
-       <div class="sidebar">
-        <!-- Contenedor del logotipo -->
+    <div class="sidebar">
         <div style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 30px;">
-            <img src="{{ url_for('static', filename='imagen/image.png') }}" alt="Logo MaterialGo" style="max-width: 50px; height: auto; object-fit: contain;">
+            <img src="{{ url_for('static', filename='imagen/image.png') }}" alt="Logo" style="max-width: 40px; height: auto;">
             <h2 style="margin-bottom: 0;">PCH</h2>
         </div>
         <div id="btn-dash" class="menu-item active" onclick="cambiarSeccion('sec-dash', this)"><i class="fa-solid fa-chart-pie"></i> Dashboard</div>
@@ -63,21 +172,31 @@
     </div>
 
     <!-- Contenido Principal -->
-      <div class="main-content">
+    <div class="main-content">
         <div class="header">
             <h1 id="titulo-panel">Panel de Control Principal</h1>
             <div class="user-info">
                 <i class="fa-solid fa-circle-user fa-xl" style="color: #0072ff;"></i>
-                <span>{{ session['username'] }} ({{ session['tipo_usuario'] }})</span>
+                <span>{{ session.get('usuario') }} (Administrador)</span>
             </div>
         </div>
 
-        <!-- SECCIÓN 1: DASHBOARD -->
-               <!-- SECCIÓN 1: DASHBOARD -->
+        <!-- Alertas Flash -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div id="flash-container">
+                    {% for category, message in messages %}
+                        <div class="flash-message alert-{{ category }}">
+                            {% if category == 'error' %}⚠️{% else %}✅{% endif %} {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <!-- SECCIÓN 1: DASHBOARD (MÉTRICAS) -->
         <div id="sec-dash" class="seccion-panel">
             <div class="cards-grid">
-                
-                <!-- ESTA ES LA TARJETA EXACTA A REEMPLAZAR -->
                 <div class="card">
                     <div class="card-info">
                         <h3>Pedidos Activos</h3>
@@ -85,7 +204,6 @@
                     </div>
                     <div class="card-icon"><i class="fa-solid fa-truck"></i></div>
                 </div>
-                
                 <div class="card">
                     <div class="card-info"><h3>Motor MySQL</h3><p>CONECTADO</p></div>
                     <div class="card-icon" style="color: #2ecc71; background: rgba(46,204,113,0.1);"><i class="fa-solid fa-database"></i></div>
@@ -97,247 +215,195 @@
             </div>
         </div>
 
-
-         <!-- SECCIÓN 2: PEDIDOS -->
- <div id="sec-pedidos" class="seccion-panel" style="display: none;">
+       <!-- SECCIÓN 2: PEDIDOS (HISTORIAL) -->
+        <div id="sec-pedidos" class="seccion-panel" style="display: none;">
             <div class="table-container">
-                <h2>Crear Nuevo Pedido de Material</h2>
-                
-                <form action="{{ url_for('admin.crear_usuario') }}" method="POST" style="margin-top: 20px; display: flex; flex-direction: column; gap: 15px; max-width: 500px;">
-
-
-                    <div>
-                        <label style="display:block; margin-bottom:5px; font-weight:600;">Tipo de Material</label>
-                        <select name="material" required style="width:100%; padding:10px; border-radius:6px; border:1px solid #ccc;">
-                            <!-- precios de individuales de materiales -->
-                            <option value="150.0">Volqueta de Arena ($60.00)</option>
-                            <option value="180.0">Volqueta de Piedra ($45.00)</option>
-                            <option value="120.0">Volqueta de Lastre ($35.00)</option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label style="display:block; margin-bottom:5px; font-weight:600;">Zona de Entrega (Tarifa Transporte)</label>
-                        <select name="tarifa_zona" required style="width:100%; padding:10px; border-radius:6px; border:1px solid #ccc;">
-                            <!-- precios de trasnporte-->
-                            <option value="30.0">Zona Norte ($30.00)</option>
-                            <option value="45.0">Zona Sur ($45.00)</option>
-                            <option value="25.0">Zona Centro ($25.00)</option>
-                            <option value="60.0">Zona Periférica ($60.00)</option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label style="display:block; margin-bottom:5px; font-weight:600;">Horas de Uso de Retroexcavadora (Opcional)</label>
-                        <input type="number" name="horas_retro" min="0" value="0" style="width:100%; padding:10px; border-radius:6px; border:1px solid #ccc;">
-                    </div>
-
-                    <button type="submit" style="background:#0072ff; color:white; padding:12px; border:none; border-radius:6px; font-weight:bold; cursor:pointer; margin-top:10px;">
-                        Calcular y Registrar Pedido
-                    </button>
-                </form>
-            </div>
-
-            <!-- HISTORIAL DE PEDIDOS  -->
-            <div class="table-container" style="margin-top: 30px;">
-                <h2>Historial de Pedidos Realizados</h2>
-                <table class="data-table" style="margin-top: 15px;">
+                <h2><i class="fa-solid fa-receipt"></i> Historial de Cotizaciones de Clientes</h2>
+                <table class="data-table">
                     <thead>
                         <tr>
                             <th>ID</th>
-                            <th>Costo Material</th>
-                            <th>Transporte</th>
-                            <th>Maquinaria</th>
-                            <th>Total Final</th>
+                            <th>Material ($)</th>
+                            <th>Transporte ($)</th>
+                            <th>Maquinaria ($)</th>
+                            <th>Total Final ($)</th>
                         </tr>
                     </thead>
                     <tbody>
-    {% for pedido in pedidos %}
-    <tr>
-        <td>{{ pedido[0] }}</td> <!-- ID del pedido -->
-        <td>${{ pedido[1] }}</td> <!-- Costo del Material -->
-        <td>${{ pedido[2] }}</td> <!-- Costo del Transporte -->
-        <td>${{ pedido[3] }}</td> <!-- Costo de Maquinaria -->
-        <td><strong>${{ pedido[4] }}</strong></td> <!-- Total Final -->
-    </tr>
-    {% endfor %}
-</tbody>
-                </table>
-            </div>
-</div>
-
-
-            <!-- SECCIÓN 3: MAQUINARIA -->
-        <div id="sec-maquinaria" class="seccion-panel" style="display: none;">
-            <div class="table-container">
-                <h2>Control y Estado de Retroexcavadoras</h2>
-                
-                <table class="data-table" style="margin-top: 15px;">
-                    <thead>
+                        {% for pedido in pedidos %}
                         <tr>
-                            <th>ID</th>
-                            <th>Código de Máquina</th>
-                            <th>Tipo</th>
-                            <th>Estado Actual</th>
-                            <th>Horas de Uso Acumuladas</th>
+                            <td>#{{ pedido[0] }}</td>
+                            <td>${{ "%.2f"|format(pedido[1]) }}</td>
+                            <td>${{ "%.2f"|format(pedido[2]) }}</td>
+                            <td>${{ "%.2f"|format(pedido[3]) }}</td>
+                            <td style="color: #2ecc71; font-weight: 600;">${{ "%.2f"|format(pedido[4]) }}</td>
                         </tr>
-                    </thead>
-                    <tbody>
-                     {% for maq in maquinarias %}
-             <tr>
-        <td>{{ maq[0] }}</td> 
-        <td><strong>{{ maq[1] }}</strong></td> 
-          <td>{{ maq[2] }}</td> 
-            <td>
-                <span class="badge {% if maq[3] == 'Disponible' %}badge-admin{% else %}badge-user{% endif %}">
-                {{ maq[3] }} 
-            </span>
-          </td>
-            <td>{{ maq[4] }} hrs</td> 
-                    </tr>
-            {% endfor %}
-
-
+                        {% else %}
+                        <tr><td colspan="5" style="text-align: center; color: #8f8f9d;">No hay pedidos registrados.</td></tr>
+                        {% endfor %}
                     </tbody>
                 </table>
             </div>
+        </div>
 
-            <!-- FORMULARIO PARA ACTUALIZAR MAQUINARIA -->
-            <div class="table-container" style="margin-top: 25px;">
-                <h2>Registrar Reporte de Maquinaria</h2>
+        <!-- SECCIÓN 3: MAQUINARIA -->
+        <div id="sec-maquinaria" class="seccion-panel" style="display: none;">
+            <div class="table-container">
+                <h2><i class="fa-solid fa-gears"></i> Monitoreo de Retroexcavadoras</h2>
+                <table class="data-table" style="margin-bottom: 30px;">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Código</th>
+                            <th>Tipo</th>
+                            <th>Estado</th>
+                            <th>Horas de Uso</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for maquina in maquinarias %}
+                        <tr>
+                            <td>{{ maquina[0] }}</td>
+                            <td><strong>{{ maquina[1] }}</strong></td>
+                            <td>{{ maquina[2] }}</td>
+                            <td>
+                                <span class="badge {% if maquina[3] == 'Disponible' %}badge-user{% else %}badge-admin{% endif %}">
+                                    {{ maquina[3] }}
+                                </span>
+                            </td>
+                            <td>{{ maquina[4] }} hrs</td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="5" style="text-align: center; color: #8f8f9d;">No hay maquinarias ingresadas.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                
+            <!-- MAQUINARIA ACTUALIZA -->
+                <h2>Actualizar Horas y Estado de Maquinaria</h2>
                 <form action="{{ url_for('admin.actualizar_maquinaria') }}" method="POST" style="margin-top: 15px; display: flex; flex-direction: column; gap: 15px; max-width: 500px;">
-                   
-                <div>
-                <label style="display:block; margin-bottom:5px; font-weight:600;">Seleccionar Máquina</label>
-                 <select name="id_maquina" required style="width:100%; padding:10px; border-radius:6px; border:1px solid #ccc;">
-                {% for maq in maquinarias %}
-                <option value="{{ maq[0] }}">{{ maq[1] }} ({{ maq[3] }})</option>
-                 {% endfor %}
-                 </select>  
-                    </div>
-
-
                     <div>
-                        <label style="display:block; margin-bottom:5px; font-weight:600;">Nuevo Estado</label>
-                        <select name="estado" required style="width:100%; padding:10px; border-radius:6px; border:1px solid #ccc;">
-                            <option value="Disponible">Disponible</option>
-                            <option value="Ocupada">Ocupada</option>
-                            <option value="En Servicio">En Servicio (Mantenimiento)</option>
+                        <label style="display:block; margin-bottom:5px;">Seleccionar Equipo</label>
+                        <select name="id_maquina" required>
+                            {% for maquina in maquinarias %}
+                                <option value="{{ maquina[0] }}">{{ maquina[1] }} - {{ maquina[2] }}</option>
+                            {% endfor %}
                         </select>
                     </div>
-
                     <div>
-                        <label style="display:block; margin-bottom:5px; font-weight:600;">Agregar Horas de Trabajo Realizadas</label>
-                        <input type="number" name="horas_nuevas" min="0" value="0" style="width:100%; padding:10px; border-radius:6px; border:1px solid #ccc;">
+                        <label style="display:block; margin-bottom:5px;">Nuevo Estado</label>
+                        <select name="estado" required>
+                            <option value="Disponible">Disponible</option>
+                            <option value="En Uso">En Uso</option>
+                            <option value="Mantenimiento">Mantenimiento</option>
+                        </select>
                     </div>
-
-                    <button type="submit" style="background:#0072ff; color:white; padding:12px; border:none; border-radius:6px; font-weight:bold; cursor:pointer; margin-top:10px;">
-                        Guardar Reporte de Maquinaria
-                    </button>
+                    <div>
+                        <label style="display:block; margin-bottom:5px;">Horas a Sumar al Reporte</label>
+                        <input type="number" name="horas_nuevas" placeholder="0" min="0" required>
+                    </div>
+                    <button type="submit" class="btn-submit-panel">Actualizar Registro</button>
                 </form>
             </div>
         </div>
 
+        <!-- SECCIÓN 4: CONTROL DE PERSONAL -->
+        <div id="sec-personal" class="seccion-panel" style="display: none;">
+            <div class="table-container">
+                <h2><i class="fa-solid fa-users-gear"></i> Usuarios con Acceso al Sistema</h2>
+                <table class="data-table" style="margin-bottom:30px;">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre de Usuario</th>
+                            <th>Rol</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for usuario in usuarios %}
+                        <tr>
+                            <td>{{ usuario[0] }}</td>
+                            <td>{{ usuario[1] }}</td>
+                            <td><span class="badge {% if usuario[2] == 'Cliente' %}badge-user{% else %}badge-admin{% endif %}">{{ usuario[2] }}</span></td>
+                            <td>
+                                <form action="{{ url_for('admin.eliminar_usuario', id_usuario=usuario[0]) }}" method="POST" onsubmit="return confirm('¿Eliminar cuenta?');">
+                                    <input type="hidden" name="username_eliminar" value="{{ usuario[1] }}">
+                                    <button type="submit" class="btn-delete"><i class="fa-solid fa-trash"></i></button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
 
-        
-       <!-- SECCIÓN 4: CONTROL DE PERSONAL -->
-  <div id="sec-personal" class="seccion-panel" style="display: none;">
-    
-            <!-- FORMULARIO PARA AÑADIR NUEVO PERSONAL -->
-            <div class="table-container" style="margin-bottom: 25px;">
-                <h2>Añadir Nuevo Personal al Sistema</h2>
-                <form action="{{ url_for('admin.crear_usuario') }}" method="POST" style="margin-top: 15px; display: flex; flex-wrap: wrap; gap: 15px; align-items: flex-end;">
-                    <div style="flex: 1; min-width: 150px;">
-                        <label style="display:block; margin-bottom:5px; font-weight:600; font-size: 14px;">Nombre de Usuario</label>
-                        <input type="text" name="username" required placeholder="Ej: carlos_chofer" style="width:100%; padding:10px; border-radius:6px; border:1px solid #ccc;">
+                <h2>Registrar un Nuevo Usuario (Operador/Admin)</h2>
+                <form action="{{ url_for('admin.crear_usuario') }}" method="POST" style="margin-top: 15px; display: flex; flex-direction: column; gap: 15px; max-width: 500px;">
+                    <div>
+                        <label style="display:block; margin-bottom:5px;">Nombre de Usuario</label>
+                        <input type="text" name="username" placeholder="Ej. operador_pch" required>
                     </div>
-                    
-                    <div style="flex: 1; min-width: 150px;">
-                        <label style="display:block; margin-bottom:5px; font-weight:600; font-size: 14px;">Contraseña</label>
-                        <input type="password" name="password" required placeholder="••••••••" style="width:100%; padding:10px; border-radius:6px; border:1px solid #ccc;">
+                    <div>
+                        <label style="display:block; margin-bottom:5px;">Contraseña Temporal</label>
+                        <input type="password" name="password" required>
                     </div>
-
-                    <!-- ESTO ES LO NUEVO: Selector alineado a las clases del diagrama -->
-                    <div style="flex: 1; min-width: 180px;">
-                        <label style="display:block; margin-bottom:5px; font-weight:600; font-size: 14px;">Tipo de Personal (Rol)</label>
-                        <select name="rol" required style="width:100%; padding:10px; border-radius:6px; border:1px solid #ccc;">
+                    <div>
+                        <label style="display:block; margin-bottom:5px;">Rol de Sistema</label>
+                        <select name="rol">
                             <option value="Administrador">Administrador</option>
-                            <option value="Chofer">Chofer (Conduce Volqueta)</option>
-                            <option value="OperadorRetro">Operador de Retroexcavadora</option>
+                            <option value="Cliente">Cliente</option>
                         </select>
                     </div>
-
-                    <div>
-                        <button type="submit" style="background:#2ecc71; color:white; padding:11px 20px; border:none; border-radius:6px; font-weight:bold; cursor:pointer; font-size: 14px; display: flex; align-items: center; gap: 8px;">
-                            <i class="fa-solid fa-user-plus"></i> Añadir Personal
-                        </button>
-                    </div>
+                    <button type="submit" class="btn-submit-panel">Crear Cuenta Oficial</button>
                 </form>
-                <!-- TABLA DE PERSONAL -->
-                        <div class="table-container">
-                            <h2>Personal Registrado en el Sistema</h2>
-                            <table class="data-table" style="margin-top: 15px;">
-                                <thead>
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>Nombre de Usuario</th>
-                                        <th>Rol / Puesto</th>
-                                        <th>Acciones</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for usuario in usuarios %}
-                                    <tr>
-                                        <td>{{ usuario[0] }}</td>
-                                        <td><strong>{{ usuario[1] }}</strong></td>
-                                        <td>
-                                            <span class="badge {% if usuario[2] == 'Administrador' %}badge-admin{% else %}badge-user{% endif %}">
-                                                {{ usuario[2] }}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <form action="{{ url_for('admin.eliminar_usuario', id_usuario=usuario[0]) }}" method="POST" onsubmit="return confirm('¿Estás seguro de eliminar a este usuario?');" style="margin: 0;">
-                                                <input type="hidden" name="username_eliminar" value="{{ usuario[1] }}">
-                                                <button type="submit" style="background: #ff4d4d; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600;">
-                                                    <i class="fa-solid fa-trash"></i> Eliminar
-                                                </button>
-                                            </form>
-                                        </td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-</div>
+            </div>
+        </div>
 
-
-    </div>
-
-      <!-- Script de navegación interactiva sin recarga de página completo -->
-    <script>
-        function cambiarSeccion(idSeccion, botonActivo) {
-            // 1. Ocultar todas las secciones
-            const secciones = document.querySelectorAll('.seccion-panel');
-            secciones.forEach(sec => sec.style.display = 'none');
-            
-            // 2. Mostrar la sección seleccionada
-            document.getElementById(idSeccion).style.display = 'block';
-            
-            // 3. Quitar la clase activa de todos los botones del menú
-            const itemsMenu = document.querySelectorAll('.menu-item');
-            itemsMenu.forEach(item => item.classList.remove('active'));
-            
-            // 4. Agregar la clase activa al botón presionado
-            botonActivo.classList.add('active');
-
-            // 5. Cambiar el título superior dinámicamente según la sección
-            const titulo = document.getElementById('titulo-panel');
-            if (idSeccion === 'sec-dash') titulo.innerText = 'Panel de Control Principal';
-            if (idSeccion === 'sec-pedidos') titulo.innerText = 'Gestión de Pedidos de Materiales';
-            if (idSeccion === 'sec-maquinaria') titulo.innerText = 'Control de Retroexcavadoras';
-            if (idSeccion === 'sec-personal') titulo.innerText = 'Personal Registrado en el Sistema';
+<script>
+    function cambiarSeccion(idSeccion, elementoActivo) {
+        // 1. Ocultar absolutamente todas las secciones del panel
+        document.querySelectorAll('.seccion-panel').forEach(sec => {
+            sec.style.display = 'none';
+        });
+        
+        // 2. Mostrar únicamente la sección a la que se le hizo clic
+        const seccionObjetivo = document.getElementById(idSeccion);
+        if (seccionObjetivo) {
+            seccionObjetivo.style.display = 'block';
         }
+        
+        // 3. Quitar la clase "active" de todos los botones de la barra lateral
+        document.querySelectorAll('.menu-item').forEach(item => {
+            item.classList.remove('active');
+        });
+        
+        // 4. Agregar la clase "active" solo al botón presionado
+        elementoActivo.classList.add('active');
+        
+        // 5. Cambiar el título principal de la cabecera dinámicamente
+        const titulos = {
+            'sec-dash': 'Panel de Control Principal',
+            'sec-pedidos': 'Control e Historial de Pedidos',
+            'sec-maquinaria': 'Gestión de Maquinaria y Equipos',
+            'sec-personal': 'Administración de Personal de Sistema'
+        };
+        
+        const tituloPanel = document.getElementById('titulo-panel');
+        if (tituloPanel && titulos[idSeccion]) {
+            tituloPanel.innerText = titulos[idSeccion];
+        }
+    }
+
+    // Temporizador para que las alertas desaparezcan solas
+    window.addEventListener('DOMContentLoaded', () => {
+        const flashContainer = document.getElementById('flash-container');
+        if (flashContainer) {
+            setTimeout(() => {
+                flashContainer.style.opacity = '0';
+                setTimeout(() => { flashContainer.remove(); }, 500);
+            }, 4000);
+        }
+    });
     </script>
 </body>
 </html>
-

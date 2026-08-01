@@ -3,32 +3,206 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MaterialGo - Panel de Cliente</title>
+    <title>PCH - Panel de Cliente</title>
+    <!-- Vinculación con tus estilos globales -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/estilos.css') }}">
+    <!-- Iconos externos FontAwesome -->
     <link rel="stylesheet" href="https://cloudflare.com">
+    
     <style>
-        body { margin: 0; font-family: 'Segoe UI', sans-serif; display: flex; background-color: #f4f6f9; }
-        .sidebar { width: 250px; height: 100vh; background-color: #1e1e2f; color: white; position: fixed; display: flex; flex-direction: column; justify-content: space-between; }
-        .sidebar-menu { padding: 20px; }
-        .sidebar-brand { font-size: 24px; font-weight: bold; margin-bottom: 30px; display: flex; align-items: center; gap: 10px; }
-        .menu-item { padding: 12px 15px; color: #a3a3c2; text-decoration: none; display: flex; align-items: center; gap: 10px; border-radius: 6px; margin-bottom: 5px; }
-        .menu-item:hover, .menu-item.active { background-color: #2d2d44; color: white; }
-        .logout { color: #ff4d4d; }
-        .main-content { margin-left: 250px; padding: 40px; width: calc(100% - 250px); box-sizing: border-box; }
-        .welcome-card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        body { 
+            margin: 0; 
+            font-family: 'Segoe UI', sans-serif; 
+            display: flex !important; 
+            justify-content: flex-start !important;
+            align-items: flex-start !important;
+            background: linear-gradient(135deg, #1e1e2f 0%, #111119 100%) !important; 
+            color: #ffffff;
+            min-height: 100vh;
+            width: 100vw;
+            overflow-x: hidden;
+        }
+
+        /* Adaptación a la paleta oscura de estilos.css */
+        body { 
+            margin: 0; 
+            font-family: 'Segoe UI', sans-serif; 
+            display: flex; 
+            background: linear-gradient(135deg, #1e1e2f 0%, #111119 100%); 
+            color: #ffffff;
+            min-height: 100vh;
+        }
         
-        /* Estilos del Formulario de Pedidos */
-        .form-container { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); max-width: 600px; }
-        .form-group { margin-bottom: 20px; display: flex; flex-direction: column; gap: 8px; }
-        .form-group label { font-weight: 600; color: #4a4a6a; }
-        .form-group input { padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 16px; }
-        .btn-order { background: #0072ff; color: white; padding: 14px; border: none; border-radius: 6px; font-weight: bold; font-size: 16px; cursor: pointer; transition: background 0.3s; }
-        .btn-order:hover { background: #0056b3; }
+        /* Barra Lateral Tecnológica */
+        .sidebar { 
+            width: 250px; 
+            height: 100vh; 
+            background-color: rgba(20, 20, 30, 0.7); 
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(12px);
+            color: white; 
+            position: fixed; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: space-between; 
+            z-index: 100;
+        }
+        .sidebar-menu { padding: 25px 20px; }
+        .sidebar-brand { 
+            font-size: 24px; 
+            font-weight: 600; 
+            margin-bottom: 35px; 
+            display: flex; 
+            align-items: center; 
+            gap: 12px; 
+            background: linear-gradient(90deg, #00c6ff 0%, #0072ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .menu-item { 
+            padding: 14px 15px; 
+            color: #8f8f9d; 
+            text-decoration: none; 
+            display: flex; 
+            align-items: center; 
+            gap: 12px; 
+            border-radius: 8px; 
+            margin-bottom: 8px; 
+            font-size: 15px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        .menu-item:hover, .menu-item.active { 
+            background-color: rgba(255, 255, 255, 0.05); 
+            color: #00c6ff; 
+            box-shadow: inset 3px 0 0 #0072ff;
+        }
+        .logout { 
+            color: #ff6b6b; 
+        }
+        .logout:hover {
+            background-color: rgba(220, 53, 69, 0.1);
+            color: #ff4d4d;
+            box-shadow: inset 3px 0 0 #dc3545;
+        }
+
+        /* Área de Contenido Principal */
+        .main-content { 
+            margin-left: 250px; 
+            padding: 40px; 
+            width: calc(100% - 250px); 
+            box-sizing: border-box; 
+        }
+
+        /* Tarjeta de Bienvenida de Cristal */
+        .welcome-card { 
+            background: rgba(255, 255, 255, 0.03); 
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            backdrop-filter: blur(12px);
+            padding: 30px; 
+            border-radius: 14px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2); 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 30px; 
+        }
+        .welcome-card h1 {
+            background: linear-gradient(90deg, #ffffff 0%, #dcdced 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
         
-        /* Notificaciones Flash */
-        .flash-messages { margin-bottom: 20px; }
-        .flash-success { background: #e8f5e9; color: #2ecc71; padding: 15px; border-radius: 6px; font-weight: 600; border-left: 5px solid #2ecc71; }
-        .flash-error { background: #ffebee; color: #ff4d4d; padding: 15px; border-radius: 6px; font-weight: 600; border-left: 5px solid #ff4d4d; }
+        /* Contenedor del Formulario */
+        .form-container { 
+            background: rgba(255, 255, 255, 0.02); 
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(12px);
+            padding: 35px; 
+            border-radius: 16px; 
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+            max-width: 650px; 
+        }
+        .form-group { margin-bottom: 24px; display: flex; flex-direction: column; gap: 8px; }
+        .form-group label { font-size: 14px; font-weight: 500; color: #b3b3b3; }
+        
+        /* Inputs Estilo Cyberpunk */
+        .form-group input, 
+        .form-group select { 
+            padding: 14px; 
+            background: rgba(255, 255, 255, 0.04) !important;
+            border: 1px solid rgba(255, 255, 255, 0.08) !important;
+            outline: none;
+            border-radius: 8px; 
+            color: #ffffff !important;
+            font-size: 15px; 
+            transition: all 0.3s ease;
+            width: 100%;
+            cursor: pointer;
+            appearance: none; /* Remueve la flecha genérica de Windows */
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://w3.org' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2300c6ff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;
+            background-repeat: no-repeat !important;
+            background-position: right 15px center !important;
+            background-size: 18px !important;
+        }
+
+        /* Efecto Focus al seleccionar los recuadros */
+        .form-group input:focus, 
+        .form-group select:focus {
+            background: rgba(255, 255, 255, 0.07) !important;
+            border-color: #0072ff !important;
+            box-shadow: 0 0 12px rgba(0, 114, 255, 0.25) !important;
+        }
+
+        /* Estilo para las opciones desplegadas (Caja interna del menú) */
+        .form-group select option {
+            background-color: #161623 !important; /* Fondo oscuro interno */
+            color: #ffffff !important;
+            padding: 12px;
+        }
+        
+        /* Botón de Envío Gradiente */
+        .btn-order { 
+            width: 100%;
+            background: linear-gradient(90deg, #0072ff 0%, #00c6ff 100%); 
+            color: white; 
+            padding: 14px; 
+            border: none; 
+            outline: none;
+            border-radius: 8px; 
+            font-weight: 600; 
+            font-size: 16px; 
+            cursor: pointer; 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            transition: transform 0.2s ease, box-shadow 0.3s ease;
+            margin-top: 10px;
+        }
+        .btn-order:hover { 
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 198, 255, 0.4);
+        }
+        .btn-order:active {
+            transform: translateY(0);
+        }
+        
+        /* Insignia de Rol (Badge) */
+        .badge-cliente {
+            background: rgba(46, 204, 113, 0.1); 
+            color: #2ecc71; 
+            border: 1px solid rgba(46, 204, 113, 0.2);
+            padding: 8px 16px; 
+            border-radius: 20px; 
+            font-weight: 600; 
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
     </style>
 </head>
 <body>
@@ -37,67 +211,204 @@
     <div class="sidebar">
         <div class="sidebar-menu">
             <div class="sidebar-brand">
-                <i class="fa-solid fa-hard-hat"></i> MaterialGo
+                <i class="fa-solid fa-helmet-safety"></i> PCH
             </div>
-            <a href="#" class="menu-item active"><i class="fa-solid fa-truck-ramp-box"></i> Solicitar Pedido</a>
-            <a href="#" class="menu-item"><i class="fa-solid fa-receipt"></i> Mis Compras</a>
+                <a href="#" id="btn-pedido" class="menu-item active" onclick="cambiarSeccionCliente('sec-pedido', this)"><i class="fa-solid fa-truck-ramp-box"></i> Solicitar Pedido</a>
+                <a href="#" id="btn-compras" class="menu-item" onclick="cambiarSeccionCliente('sec-compras', this)"><i class="fa-solid fa-receipt"></i> Mis Compras</a>
         </div>
+
         <div class="sidebar-menu">
-            <a href="{{ url_for('admin.enlogin') }}" class="menu-item logout"><i class="fa-solid fa-right-from-bracket"></i> Cerrar Sesión</a>
+            <a href="{{ url_for('admin.logout') }}" class="menu-item logout"><i class="fa-solid fa-right-from-bracket"></i> Cerrar Sesión</a>
         </div>
     </div>
 
     <!-- CONTENIDO PRINCIPAL -->
     <div class="main-content">
         
-        <!-- Notificaciones de Flask -->
+        <!-- Reutilización de tus notificaciones Flash Modernas de estilos.css -->
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
-                <div class="flash-messages">
+                <div id="flash-container">
                     {% for category, message in messages %}
-                        <div class="flash-{{ category }}">{{ message }}</div>
+                        <div class="flash-message alert-{{ category }}">
+                            {% if category == 'error' %}⚠️{% else %}✅{% endif %} {{ message }}
+                        </div>
                     {% endfor %}
                 </div>
             {% endif %}
         {% endwith %}
 
+        <!-- TARJETA DE BIENVENIDA -->
         <div class="welcome-card">
             <div>
-                <h1 style="margin: 0; color: #1e1e2f;">¡Bienvenido, {{ usuario }}!</h1>
-                <p style="margin: 5px 0 0 0; color: #7a7a9a;">Genera y cotiza tus solicitudes de materiales o maquinaria pesada.</p>
+                <h1 style="margin: 0; font-size: 28px; font-weight: 600;">¡Bienvenido, {{ usuario }}!</h1>
+                <p style="margin: 6px 0 0 0; color: #a272b7; font-size: 14px; font-weight: 500;">Genera y cotiza tus solicitudes de materiales o maquinaria pesada.</p>
             </div>
-            <span style="background: #e8f5e9; color: #2ecc71; padding: 8px 15px; border-radius: 20px; font-weight: bold; font-size: 14px;">
+            <div class="badge-cliente">
                 <i class="fa-solid fa-circle-user"></i> Cuenta Cliente
-            </span>
+            </div>
         </div>
 
-        <!-- FORMULARIO DE COTIZACIÓN Y REGISTRO -->
-        <div class="form-container">
-            <h2 style="margin-top: 0; margin-bottom: 25px; color: #1e1e2f;"><i class="fa-solid fa-calculator"></i> Nueva Cotización de Pedido</h2>
-            
-            <form action="{{ url_for('admin.crear_pedido') }}" method="POST">
-                <div class="form-group">
-                    <label for="material">Costo de Materiales ($)</label>
-                    <input type="number" step="0.01" name="material" id="material" placeholder="0.00" min="0" required>
-                </div>
+        <!-- PESTAÑA 1: FORMULARIO DE SOLICITUD  -->
+        <div id="sec-pedido" class="seccion-cliente">
+            <div class="form-container">
+                <h2 style="margin-top: 0; margin-bottom: 25px; color: #ffffff; font-size: 20px; font-weight: 600;"><i class="fa-solid fa-calculator" style="color: #00c6ff; margin-right: 5px;"></i> Nueva Cotización de Pedido</h2>
+                 <!-- CAMPO 1: MENÚ DESPLEGABLE DE MATERIALES -->
+                <form action="{{ url_for('admin.registrar_usuario_cliente') }}" method="POST">
+                    <div class="form-group">
+                        <label for="material">Seleccionar Tipo de Material</label>
+                        <select name="material" id="material" required>
+                            <option value="" disabled selected hidden>-- Elige un material --</option>
+                            <option value="60.00">Volqueta de Arena ($60.00)</option>
+                            <option value="45.00">Volqueta de Piedra ($45.00)</option>
+                            <option value="35.00">Volqueta de Lastre ($35.00)</option>
+                        </select>
+                    </div>
+                     <!-- CAMPO 2: MENÚ DESPLEGABLE DE TRANSPORTE POR ZONA -->
+                    <div class="form-group">
+                        <label for="tarifa_zona">Zona de Entrega (Tarifa Transporte)</label>
+                        <select name="tarifa_zona" id="tarifa_zona" required>
+                            <option value="" disabled selected hidden>-- Elige una zona --</option>
+                            <option value="25.00">Zona Centro ($25.00)</option>
+                            <option value="30.00">Zona Norte ($30.00)</option>
+                            <option value="45.00">Zona Sur ($45.00)</option>
+                            <option value="60.00">Zona Periférica ($60.00)</option>
+                        </select>
+                    </div>
 
-                <div class="form-group">
-                    <label for="tarifa_zona">Tarifa de Transporte por Zona ($)</label>
-                    <input type="number" step="0.01" name="tarifa_zona" id="tarifa_zona" placeholder="0.00" min="0" required>
-                </div>
+                    <div class="form-group">
+                        <label for="horas_retro">Horas de Uso de Retroexcavadora (Opcional)</label>
+                        <input type="number" step="0.5" name="horas_retro" id="horas_retro" placeholder="0" min="0">
+                        <small style="color: #8f8f9d; margin-top: 4px; font-size: 12px; display: block;">* Se aplica un cobro mínimo de 2 horas si se utiliza maquinaria ($40.00/h).</small>
+                    </div>
 
-                <div class="form-group">
-                    <label for="horas_retro">Horas de Uso de Retroexcavadora (Opcional)</label>
-                    <input type="number" step="0.5" name="horas_retro" id="horas_retro" placeholder="0" min="0">
-                    <small style="color: #7a7a9a; margin-top: 2px;">* Se aplica un cobro mínimo de 2 horas si se utiliza maquinaria ($40.00/h).</small>
-                </div>
-
-                <button type="submit" class="btn-order">
-                    <i class="fa-solid fa-paper-plane"></i> Calcular y Confirmar Pedido
-                </button>
-            </form>
+                    <button type="submit" class="btn-order">
+                        <i class="fa-solid fa-paper-plane"></i> Calcular y Confirmar Pedido
+                    </button>
+                </form>
+            </div>
         </div>
+
+        <!--  PESTAÑA 2: HISTORIAL DE COMPRAS  -->
+        <div id="sec-compras" class="seccion-cliente" style="display: none;">
+            <!-- Reutilizamos las clases CSS de tablas modernas que ya tienes en estilos.css -->
+            <div class="table-container" style="background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); padding: 30px; border-radius: 14px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); width: 100%;">
+                <h2 style="font-size: 18px; margin-bottom: 20px; color: #00c6ff; font-weight: 600;"><i class="fa-solid fa-clock-history"></i> Mis Pedidos y Cotizaciones Realizadas</h2>
+                
+                <table class="data-table" style="width: 100%; border-collapse: collapse; text-align: left;">
+                    <thead>
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                            <th style="padding: 14px 16px; color: #8f8f9d; font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px;">ID Pedido</th>
+                            <th style="padding: 14px 16px; color: #8f8f9d; font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px;">Materiales</th>
+                            <th style="padding: 14px 16px; color: #8f8f9d; font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px;">Transporte</th>
+                            <th style="padding: 14px 16px; color: #8f8f9d; font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px;">Maquinaria</th>
+                            <th style="padding: 14px 16px; color: #8f8f9d; font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px;">Total Pagado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- RECORRIDO DE JINJA2 PARA TUS COMPRAS (Asegúrate de enviar 'compras' desde Python si deseas datos reales) -->
+                        {% for compra in compras %}
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                            <td style="padding: 14px 16px;">#{{ compra[0] }}</td>
+                            <td style="padding: 14px 16px;">${{ "%.2f"|format(compra[1]) }}</td>
+                            <td style="padding: 14px 16px;">${{ "%.2f"|format(compra[2]) }}</td>
+                            <td style="padding: 14px 16px;">${{ "%.2f"|format(compra[3]) }}</td>
+                            <td style="padding: 14px 16px; color: #2ecc71; font-weight: 600;">${{ "%.2f"|format(compra[4]) }}</td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="5" style="text-align: center; color: #8f8f9d; padding: 30px 14px;">Aún no has realizado ninguna solicitud de materiales.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
     </div>
+    
+     
+    <script>
+    // FUNCIÓN PARA NAVEGAR ENTRE "SOLICITAR PEDIDO" Y "MIS COMPRAS"
+    function cambiarSeccionCliente(idSeccion, elementoActivo) {
+        // Ocultar las pantallas de contenido del cliente
+        document.querySelectorAll('.seccion-cliente').forEach(sec => {
+            sec.style.display = 'none';
+        });
+        
+        // Mostrar la pantalla correspondiente
+        const seccionObjetivo = document.getElementById(idSeccion);
+        if (seccionObjetivo) {
+            seccionObjetivo.style.display = 'block';
+        }
+        
+        // Quitar la selección visual de los botones de la barra lateral
+        document.querySelectorAll('.menu-item').forEach(item => {
+            item.classList.remove('active');
+        });
+        
+        // Activar el botón presionado
+        elementoActivo.classList.add('active');
+
+        // Cambiar el subtítulo superior dinámicamente según la sección
+        const subtitulo = document.getElementById('subtitulo-cliente');
+        if (subtitulo) {
+            if (idSeccion === 'sec-pedido') {
+                subtitulo.innerText = "Genera y cotiza tus solicitudes de materiales o maquinaria pesada.";
+            } else {
+                subtitulo.innerText = "Revisa el estado financiero e historial de todas tus cotizaciones procesadas.";
+            }
+        }
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+        // TEMPORIZADOR PARA DESVANECER ALERTAS FLASH
+        const flashContainer = document.getElementById('flash-container');
+        if (flashContainer) {
+            setTimeout(() => {
+                flashContainer.style.transition = 'opacity 0.5s ease';
+                flashContainer.style.opacity = '0';
+                setTimeout(() => { flashContainer.remove(); }, 500);
+            }, 4000);
+        }
+
+        // CÁLCULO DE COTIZACIÓN EN TIEMPO REAL
+        const inputMaterial = document.getElementById('material');
+        const inputTransporte = document.getElementById('tarifa_zona');
+        const inputHorasRetro = document.getElementById('horas_retro');
+        const btnOrder = document.querySelector('.btn-order');
+        const textoOriginalBoton = btnOrder ? btnOrder.innerHTML : '';
+
+        function calcularTotalTiempoReal() {
+            if (!btnOrder) return;
+            const costoMaterial = Math.max(0, parseFloat(inputMaterial.value) || 0);
+            const costoTransporte = Math.max(0, parseFloat(inputTransporte.value) || 0);
+            let horasRetro = parseFloat(inputHorasRetro.value) || 0;
+
+            let costoMaquinaria = 0;
+            if (horasRetro > 0) {
+                if (horasRetro < 2) horasRetro = 2;
+                costoMaquinaria = horasRetro * 40.00;
+            }
+
+            const totalEstimado = costoMaterial + costoTransporte + costoMaquinaria;
+
+            if (costoMaterial > 0 || costoTransporte > 0 || horasRetro > 0) {
+                btnOrder.innerHTML = `<i class="fa-solid fa-calculator"></i> Total Estimado: $${totalEstimado.toFixed(2)} | Confirmar Pedido`;
+                btnOrder.style.background = 'linear-gradient(90deg, #2ecc71 0%, #28a745 100%)';
+            } else {
+                btnOrder.innerHTML = textoOriginalBoton;
+                btnOrder.style.background = '';
+            }
+        }
+
+        if (inputMaterial && inputTransporte && inputHorasRetro) {
+            inputMaterial.addEventListener('input', calcularTotalTiempoReal);
+            inputTransporte.addEventListener('input', calcularTotalTiempoReal);
+            inputHorasRetro.addEventListener('input', calcularTotalTiempoReal);
+        }
+    });
+    </script>
 
 </body>
 </html>
