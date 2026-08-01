@@ -240,6 +240,7 @@ def crear_usuario():
     if not session.get('logeado'):
         return redirect(url_for('admin.enlogin'))
         
+        
     # 1. INICIALIZAMOS EN NONE PARA EVITAR EL ERROR DE LA CAPTURA
     cursor = None 
     
@@ -275,6 +276,8 @@ def crear_usuario():
             cursor.close()
             
     return redirect(url_for('admin.dashboard'))
+
+
 
 
     @admin.route('/registrar-cliente', methods=['POST'])
