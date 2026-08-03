@@ -44,3 +44,30 @@ CREATE TABLE usuarios (
     password VARCHAR(255) NOT NULL,
     rol VARCHAR(50) DEFAULT 'Administrador'
 );
+-- Tabla de Materiales (para el catálogo y el dropdown)
+CREATE TABLE materiales (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    descripcion TEXT
+);
+
+-- Tabla de Volquetas
+CREATE TABLE volquetas (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    clase VARCHAR(50) NOT NULL,
+    placa VARCHAR(20) UNIQUE NOT NULL,
+    capacidad DECIMAL(10,2) NOT NULL,
+    disponible BOOLEAN DEFAULT TRUE,
+    operador_id INT NULL,
+    FOREIGN KEY (operador_id) REFERENCES usuarios(id) -- O la tabla de choferes que uses
+);
+
+-- Tabla de Zonas y Tarifas
+CREATE TABLE zonas_tarifas (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    zona VARCHAR(100) NOT NULL,
+    tarifa DECIMAL(10,2) NOT NULL
+);
+
+-- Modificar o expandir tu tabla de cotizaciones/pedidos para incluir el estado, material y zona
+-- (Asegúrate de enlazar material_id y zona_tarifa_id como llaves foráneas)

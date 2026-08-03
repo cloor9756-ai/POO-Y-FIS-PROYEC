@@ -7,7 +7,7 @@
     <!-- Vinculación con tus estilos globales -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/estilos.css') }}">
     <!-- Iconos externos FontAwesome -->
-    <link rel="stylesheet" href="https://cloudflare.com">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     
         <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
@@ -160,16 +160,27 @@
 
     <!-- Barra Lateral Única -->
     <div class="sidebar">
-        <div style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 30px;">
-            <img src="{{ url_for('static', filename='imagen/image.png') }}" alt="Logo" style="max-width: 40px; height: auto;">
-            <h2 style="margin-bottom: 0;">PCH</h2>
-        </div>
-        <div id="btn-dash" class="menu-item active" onclick="cambiarSeccion('sec-dash', this)"><i class="fa-solid fa-chart-pie"></i> Dashboard</div>
-        <div class="menu-item" onclick="cambiarSeccion('sec-pedidos', this)"><i class="fa-solid fa-truck-ramp-box"></i> Pedidos Material</div>
-        <div class="menu-item" onclick="cambiarSeccion('sec-maquinaria', this)"><i class="fa-solid fa-screwdriver-wrench"></i> Retroexcavadoras</div>
-        <div class="menu-item" onclick="cambiarSeccion('sec-personal', this)"><i class="fa-solid fa-users"></i> Control Personal</div>
-        <a href="{{ url_for('admin.logout') }}" class="menu-item logout"><i class="fa-solid fa-right-from-bracket"></i> Cerrar Sesión</a>
+    <div id="btn-dash" class="menu-item active" onclick="cambiarSeccion('sec-dash', this)">
+        <i class="fa-solid fa-chart-pie"></i> Dashboard
     </div>
+    <div class="menu-item" onclick="cambiarSeccion('sec-pedidos', this)">
+        <i class="fa-solid fa-truck-ramp-box"></i> Pedidos Material
+    </div>
+    
+    <!-- ÚNICO BOTÓN LOGÍSTICO INTEGRADO -->
+    <div class="menu-item" onclick="cambiarSeccion('sec-maquinaria', this)">
+        <i class="fa-solid fa-screwdriver-wrench"></i> Maquinaria y Volquetas
+    </div>
+    
+    <div class="menu-item" onclick="cambiarSeccion('sec-personal', this)">
+        <i class="fa-solid fa-users"></i> Control Personal
+    </div>
+    
+    <a href="{{ url_for('admin.logout') }}" class="menu-item logout">
+        <i class="fa-solid fa-right-from-bracket"></i> Cerrar Sesión
+    </a>
+</div>
+
 
     <!-- Contenido Principal -->
     <div class="main-content">
@@ -194,8 +205,8 @@
             {% endif %}
         {% endwith %}
 
-        <!-- SECCIÓN 1: DASHBOARD (MÉTRICAS) -->
-        <div id="sec-dash" class="seccion-panel">
+       <!-- ================= SECCIÓN 1: DASHBOARD (MÉTRICAS) ================= -->
+        <div id="sec-dash" class="section-panel">
             <div class="cards-grid">
                 <div class="card">
                     <div class="card-info">
@@ -215,154 +226,157 @@
             </div>
         </div>
 
-       <!-- SECCIÓN 2: PEDIDOS (HISTORIAL) -->
-        <div id="sec-pedidos" class="seccion-panel" style="display: none;">
+        <!-- ================= SECCIÓN 2: PEDIDOS (HISTORIAL) ================= -->
+        <div id="sec-pedidos" class="section-panel" style="display: none;">
             <div class="table-container">
-                <h2><i class="fa-solid fa-receipt"></i> Historial de Cotizaciones de Clientes</h2>
+                <h2><i class="fa-solid fa-truck-ramp-box"></i> Historial de Pedidos y Cotizaciones</h2>
                 <table class="data-table">
                     <thead>
                         <tr>
                             <th>ID</th>
-                            <th>Material ($)</th>
-                            <th>Transporte ($)</th>
-                            <th>Maquinaria ($)</th>
-                            <th>Total Final ($)</th>
+                            <th>Costo Material</th>
+                            <th>Costo Transporte</th>
+                            <th>Costo Maquinaria</th>
+                            <th>Total</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for pedido in pedidos %}
+                        {% for ped in pedidos %}
                         <tr>
-                            <td>#{{ pedido[0] }}</td>
-                            <td>${{ "%.2f"|format(pedido[1]) }}</td>
-                            <td>${{ "%.2f"|format(pedido[2]) }}</td>
-                            <td>${{ "%.2f"|format(pedido[3]) }}</td>
-                            <td style="color: #2ecc71; font-weight: 600;">${{ "%.2f"|format(pedido[4]) }}</td>
+                            <td>{{ ped[0] }}</td>
+                            <td>$ {{ "{:,.2f}".format(ped[1]) }}</td>
+                            <td>$ {{ "{:,.2f}".format(ped[2]) }}</td>
+                            <td>$ {{ "{:,.2f}".format(ped[3]) }}</td>
+                            <td>$ {{ "{:,.2f}".format(ped[4]) }}</td>
                         </tr>
                         {% else %}
-                        <tr><td colspan="5" style="text-align: center; color: #8f8f9d;">No hay pedidos registrados.</td></tr>
+                        <tr>
+                            <td colspan="5" style="text-align: center; color: #888; padding: 15px;">No hay pedidos registrados en el sistema.</td>
+                        </tr>
                         {% endfor %}
                     </tbody>
                 </table>
             </div>
         </div>
 
-        <!-- SECCIÓN 3: MAQUINARIA -->
-        <div id="sec-maquinaria" class="seccion-panel" style="display: none;">
-            <div class="table-container">
-                <h2><i class="fa-solid fa-gears"></i> Monitoreo de Retroexcavadoras</h2>
-                <table class="data-table" style="margin-bottom: 30px;">
+        <!-- ================= SECCIÓN 3: MAQUINARIA Y VOLQUETAS ================= -->
+        <div id="sec-maquinaria" class="section-panel" style="display: none;">
+            <div class="table-container" style="margin-bottom: 40px;">
+                <h2><i class="fa-solid fa-screwdriver-wrench"></i> Control de Maquinaria y Volquetas</h2>
+                <table class="data-table">
                     <thead>
                         <tr>
                             <th>ID</th>
                             <th>Código</th>
                             <th>Tipo</th>
+                            <th>Placa</th>
+                            <th>Capacidad (m³)</th>
                             <th>Estado</th>
-                            <th>Horas de Uso</th>
+                            <th>Operador / Chofer</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for maquina in maquinarias %}
+                        {% for maq in maquinarias %}
                         <tr>
-                            <td>{{ maquina[0] }}</td>
-                            <td><strong>{{ maquina[1] }}</strong></td>
-                            <td>{{ maquina[2] }}</td>
+                            <td>{{ maq[0] }}</td>
+                            <td>{{ maq[1] }}</td>
+                            <td>{{ maq[2] }}</td>
+                            <td>{{ maq[5] if maq[5] else 'N/A' }}</td>
+                            <td>{{ maq[6] if maq[6] else 'N/A' }}</td>
+                            <td>{{ maq[3] }}</td>
                             <td>
-                                <span class="badge {% if maquina[3] == 'Disponible' %}badge-user{% else %}badge-admin{% endif %}">
-                                    {{ maquina[3] }}
-                                </span>
-                            </td>
-                            <td>{{ maquina[4] }} hrs</td>
-                        </tr>
-                        {% else %}
-                        <tr><td colspan="5" style="text-align: center; color: #8f8f9d;">No hay maquinarias ingresadas.</td></tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-                
-            <!-- MAQUINARIA ACTUALIZA -->
-                <h2>Actualizar Horas y Estado de Maquinaria</h2>
-                <form action="{{ url_for('admin.actualizar_maquinaria') }}" method="POST" style="margin-top: 15px; display: flex; flex-direction: column; gap: 15px; max-width: 500px;">
-                    <div>
-                        <label style="display:block; margin-bottom:5px;">Seleccionar Equipo</label>
-                        <select name="id_maquina" required>
-                            {% for maquina in maquinarias %}
-                                <option value="{{ maquina[0] }}">{{ maquina[1] }} - {{ maquina[2] }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div>
-                        <label style="display:block; margin-bottom:5px;">Nuevo Estado</label>
-                        <select name="estado" required>
-                            <option value="Disponible">Disponible</option>
-                            <option value="En Uso">En Uso</option>
-                            <option value="Mantenimiento">Mantenimiento</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label style="display:block; margin-bottom:5px;">Horas a Sumar al Reporte</label>
-                        <input type="number" name="horas_nuevas" placeholder="0" min="0" required>
-                    </div>
-                    <button type="submit" class="btn-submit-panel">Actualizar Registro</button>
-                </form>
-            </div>
-        </div>
-
-        <!-- SECCIÓN 4: CONTROL DE PERSONAL -->
-        <div id="sec-personal" class="seccion-panel" style="display: none;">
-            <div class="table-container">
-                <h2><i class="fa-solid fa-users-gear"></i> Usuarios con Acceso al Sistema</h2>
-                <table class="data-table" style="margin-bottom:30px;">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Nombre de Usuario</th>
-                            <th>Rol</th>
-                            <th>Acción</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for usuario in usuarios %}
-                        <tr>
-                            <td>{{ usuario[0] }}</td>
-                            <td>{{ usuario[1] }}</td>
-                            <td><span class="badge {% if usuario[2] == 'Cliente' %}badge-user{% else %}badge-admin{% endif %}">{{ usuario[2] }}</span></td>
-                            <td>
-                                <form action="{{ url_for('admin.eliminar_usuario', id_usuario=usuario[0]) }}" method="POST" onsubmit="return confirm('¿Eliminar cuenta?');">
-                                    <input type="hidden" name="username_eliminar" value="{{ usuario[1] }}">
-                                    <button type="submit" class="btn-delete"><i class="fa-solid fa-trash"></i></button>
+                                <form action="/asignar-operador" method="POST" style="display:inline;">
+                                    <input type="hidden" name="id_maquina" value="{{ maq[0] }}">
+                                    <select name="id_operador" onchange="this.form.submit()" style="background: #222; color: #fff; border: 1px solid #555; padding: 4px; border-radius: 4px; cursor: pointer;">
+                                        <option value="">-- Sin Asignar --</option>
+                                        {% for op in operadores %}
+                                            <option value="{{ op[0] }}" {% if maq[7] == op[1] %} selected {% endif %}>{{ op[1] }}</option>
+                                        {% endfor %}
+                                    </select>
                                 </form>
                             </td>
                         </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="7" style="text-align: center; color: #888; padding: 15px;">No hay maquinaria registrada en el sistema.</td>
+                        </tr>
                         {% endfor %}
                     </tbody>
                 </table>
-
-                <h2>Registrar un Nuevo Usuario (Operador/Admin)</h2>
-                <form action="{{ url_for('admin.crear_usuario') }}" method="POST" style="margin-top: 15px; display: flex; flex-direction: column; gap: 15px; max-width: 500px;">
-                    <div>
-                        <label style="display:block; margin-bottom:5px;">Nombre de Usuario</label>
-                        <input type="text" name="username" placeholder="Ej. operador_pch" required>
-                    </div>
-                    <div>
-                        <label style="display:block; margin-bottom:5px;">Contraseña Temporal</label>
-                        <input type="password" name="password" required>
-                    </div>
-                    <div>
-                        <label style="display:block; margin-bottom:5px;">Rol de Sistema</label>
-                        <select name="rol">
-                            <option value="Administrador">Administrador</option>
-                            <option value="Cliente">Cliente</option>
-                        </select>
-                    </div>
-                    <button type="submit" class="btn-submit-panel">Crear Cuenta Oficial</button>
-                </form>
             </div>
         </div>
+
+        <!-- ================= SECCIÓN 4: CONTROL DE PERSONAL ================= -->
+        <div id="sec-personal" class="section-panel" style="display: none;">
+            <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+                
+                <!-- Tabla de Usuarios -->
+                <div class="table-container" style="flex: 1.5; min-width: 400px;">
+                    <h2>Usuarios con Acceso al Sistema</h2>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre de Usuario</th>
+                                <th>Rol</th>
+                                <th>Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for usu in usuarios %}
+                            <tr>
+                                <td>{{ usu[0] }}</td>
+                                <td>{{ usu[1] }}</td>
+                                <td>{{ usu[2] }}</td>
+                                <td>
+                                    <form action="{{ url_for('admin.eliminar_usuario', id_usuario=usu[0]) }}" method="POST" style="display:inline;">
+                                        <input type="hidden" name="username_eliminar" value="{{ usu[1] }}">
+                                        <button type="submit" class="btn-delete" style="background: none; border: none; color: #ff4d4d; cursor: pointer;">
+                                            <i class="fa-solid fa-trash"></i> Borrar
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Formulario de Registro -->
+                <div class="table-container" style="flex: 1; min-width: 300px;">
+                    <h2>Registrar un Nuevo Usuario (Operador/Admin)</h2>
+                    <form action="{{ url_for('admin.crear_usuario') }}" method="POST">
+                        <div style="margin-bottom: 15px;">
+                            <label>Nombre de Usuario</label>
+                            <input type="text" name="username" required>
+                        </div>
+                        <div style="margin-bottom: 15px;">
+                            <label>Contraseña Temporal</label>
+                            <input type="password" name="password" required>
+                        </div>
+                        <div style="margin-bottom: 20px;">
+                            <label>Rol de Sistema</label>
+                            <select name="rol">
+                                <option value="Administrador">Administrador</option>
+                                <option value="Chofer de volqueta">Chofer de volqueta</option>
+                                <option value="Operador de retroexcavadoras">Operador de retroexcavadoras</option>
+                                <option value="Cliente">Cliente</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn-submit-panel" style="width: 100%;">Crear Cuenta Oficial</button>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
 
 <script>
     function cambiarSeccion(idSeccion, elementoActivo) {
         // 1. Ocultar absolutamente todas las secciones del panel
-        document.querySelectorAll('.seccion-panel').forEach(sec => {
+        document.querySelectorAll('.section-panel').forEach(sec => {
             sec.style.display = 'none';
         });
         

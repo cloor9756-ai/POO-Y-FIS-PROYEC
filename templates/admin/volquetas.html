@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestión de Volquetas</title>
+</head>
+<body>
+    <h1>Módulo de Volquetas</h1>
+    
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Código</th>
+                <th>Placa</th>
+                <th>Capacidad (m³)</th>
+                <th>Estado</th>
+                <th>Chofer Asignado</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for volqueta in volquetas %}
+            <tr>
+                <td>{{ volqueta[1] }}</td> <!-- codigo_maquina -->
+                <td>{{ volqueta[2] if volqueta[2] else 'N/A' }}</td> <!-- placa -->
+                <td>{{ volqueta[3] if volqueta[3] else '0.00' }}</td> <!-- capacidad -->
+                <td>{{ volqueta[4] }}</td> <!-- estado -->
+                <td>{{ volqueta[5] if volqueta[5] else 'Sin Asignar' }}</td> <!-- nombre_operador -->
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>
