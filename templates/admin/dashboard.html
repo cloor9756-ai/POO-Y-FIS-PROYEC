@@ -248,17 +248,33 @@
                             <td>$ {{ "{:,.2f}".format(ped[2]) }}</td>
                             <td>$ {{ "{:,.2f}".format(ped[3]) }}</td>
                             <td>$ {{ "{:,.2f}".format(ped[4]) }}</td>
+                            <!-- BOTON ELIMINAR PEDIDO no funcional todavia -->
+                            <td>
+                                    <button type="submit" class="btn-delete" style="background: none; border: none; color: #ff4d4d; cursor: pointer;">
+                                        <i class="fa-solid fa-trash"></i> Borrar
+                                    </button>
+                                </form>
+
+                            <!-- BOTON  de estado(confirmado-en caino-entregado) no funcional todavia -->
+                             <button type="submit" class="btn-delete" style="background: none; border: none; color: #4dffa6; cursor: pointer;">
+                                        <i class="fa-solid fa-truck"></i> Cambiar Estado
+                                    </button>
+                                </form>
+
+
+                            </td>
                         </tr>
                         {% else %}
                         <tr>
                             <td colspan="5" style="text-align: center; color: #888; padding: 15px;">No hay pedidos registrados en el sistema.</td>
                         </tr>
                         {% endfor %}
+                        
                     </tbody>
                 </table>
             </div>
         </div>
-
+    
         <!-- ================= SECCIÓN 3: MAQUINARIA Y VOLQUETAS ================= -->
         <div id="sec-maquinaria" class="section-panel" style="display: none;">
             <div class="table-container" style="margin-bottom: 40px;">
@@ -284,6 +300,17 @@
                             <td>{{ maq[5] if maq[5] else 'N/A' }}</td>
                             <td>{{ maq[6] if maq[6] else 'N/A' }}</td>
                             <td>{{ maq[3] }}</td>
+                                <!-- BOTON eliminar OPERADOR no funcional todavia -->
+                            <td>
+
+                                {% if maq[7] %}
+                                    <form action="/eliminar-operador" method="POST" style="display:inline;">
+                                        <input type="hidden" name="id_maquina" value="{{ maq[0] }}">
+                                        <button type="submit" class="btn-delete" style="background: none; border: none; color: #ff4d4d; cursor: pointer;">
+                                            <i class="fa-solid fa-trash"></i> Quitar
+                                        </button>
+                                    </form>
+                                {% endif %}               
                             <td>
                                 <form action="/asignar-operador" method="POST" style="display:inline;">
                                     <input type="hidden" name="id_maquina" value="{{ maq[0] }}">
@@ -373,6 +400,128 @@
     </div>
 
 
+
+            <!-- ================= SECCIÓN 5: GESTIONAR ZONA Y TARIFAS ================= -->
+            <div id="sec-zona" class="section-panel" style="display: none;">
+            <div class="table-container">
+                <h2><i class="fa-solid fa-map-location-dot"></i> Gestión de Zonas y Tarifas</h2>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Zona</th>
+                            <th>Tarifa por m³</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for zona in zonas %}
+                        <tr>
+                            <td>{{ zona[0] }}</td>
+                            <td>{{ zona[1] }}</td>
+                            <td>$ {{ "{:,.2f}".format(zona[2]) }}</td>
+                            <td>
+                                <!-- BOTON eliminar ZONA no funcional todavia -->
+                                <form action="/eliminar-zona" method="POST" style="display:inline;">
+                                    <input type="hidden" name="id_zona" value="{{ zona[0] }}">
+                                    <button type="submit" class="btn-delete" style="background: none; border: none; color: #ff4d4d; cursor: pointer;">
+                                        <i class="fa-solid fa-trash"></i> Borrar
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="4" style="text-align: center; color: #888; padding: 15px;">No hay zonas registradas en el sistema.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+                <!-- Formulario para agregar nueva zona -->
+                <div style="margin-top: 30px;">
+                    <h3>Agregar Nueva Zona</h3>
+                    <form action="/agregar-zona" method="POST">
+                        <div style="margin-bottom: 15px;">
+                            <label>Nombre de la Zona</label>
+                            <input type="text" name="nombre_zona" required>
+                        </div>
+                        <div style="margin-bottom: 20px;">
+                            <label>Tarifa por m³</label>
+                            <input type="number" step="0.01" name="tarifa_m3" required>
+                        </div>
+                        <button type="submit" class="btn-submit-panel">Agregar Zona</button>
+                    </form>
+                </div>
+
+
+
+            <!-- ================= SECCIÓN 6: GESTION DE CATALOGO DE MATERIALES ================= -->
+                    <div id="sec-materiales" class="section-panel" style="display: none;">
+            <div class="table-container">
+                <h2><i class="fa-solid fa-boxes-stacked"></i> Gestión de Catálogo de Materiales</h2>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre del Material</th>
+                            <th>Precio por m³</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for material in materiales %}
+                        <tr>
+                            <td>{{ material[0] }}</td>
+                            <td>{{ material[1] }}</td>
+                            <td>$ {{ "{:,.2f}".format(material[2]) }}</td>
+                            <td>
+                                <!-- BOTON eliminar MATERIAL no funcional todavia -->
+                                <form action="/eliminar-material" method="POST" style="display:inline;">
+                                    <input type="hidden" name="id_material" value="{{ material[0] }}">
+                                    <button type="submit" class="btn-delete" style="background: none; border: none; color: #ff4d4d; cursor: pointer;">
+                                        <i class="fa-solid fa-trash"></i> Borrar
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="4" style="text-align: center; color: #888; padding: 15px;">No hay materiales registrados en el sistema.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+                <!-- Formulario para agregar nuevo material -->
+                <div style="margin-top: 30px;">
+                    <h3>Agregar Nuevo Material</h3>
+                    <form action="/agregar-material" method="POST">
+                        <div style="margin-bottom: 15px;">
+                            <label>Nombre del Material</label>
+                            <input type="text" name="nombre_material" required>
+                        </div>
+                        <div style="margin-bottom: 20px;">
+                            <label>Precio por m³</label>
+                            <input type="number" step="0.01" name="precio_m3" required>
+                        </div>
+                        <button type="submit" class="btn-submit-panel">Agregar Material</button>
+                    </form>
+                </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 <script>
     function cambiarSeccion(idSeccion, elementoActivo) {
         // 1. Ocultar absolutamente todas las secciones del panel
@@ -399,7 +548,8 @@
             'sec-dash': 'Panel de Control Principal',
             'sec-pedidos': 'Control e Historial de Pedidos',
             'sec-maquinaria': 'Gestión de Maquinaria y Equipos',
-            'sec-personal': 'Administración de Personal de Sistema'
+            'sec-personal': 'Administración de Personal de Sistema',
+            'sec-materiales': 'Gestión de Catálogo de Materiales'
         };
         
         const tituloPanel = document.getElementById('titulo-panel');

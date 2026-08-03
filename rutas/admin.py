@@ -1,7 +1,8 @@
-from flask import Blueprint, app, render_template, request, redirect, url_for, flash, session
+from flask import Blueprint, render_template, request, redirect, url_for, flash, session
 from functools import wraps
 
 admin = Blueprint('admin', __name__)
+
 
 def login_requerido(f):
     @wraps(f)
@@ -11,6 +12,7 @@ def login_requerido(f):
             return redirect(url_for('admin.enlogin'))
         return f(*args, **kwargs)
     return funcion_decorada
+
 
 @admin.route('/login', methods=['GET', 'POST'])
 def enlogin():
@@ -51,6 +53,7 @@ def enlogin():
             
     return render_template('index.html')
 
+
 @admin.route('/dashboard-cliente')
 def dashboard_cliente():
     if not session.get('logeado') or session.get('rol') != 'Cliente':
@@ -65,6 +68,7 @@ def dashboard_cliente():
     
     cursor.execute("SELECT zona, tarifa FROM zonas_tarifas")
     lista_zonas = cursor.fetchall()
+    
     cursor.close()
         
     return render_template('admin/dashboard-cliente.html', 
@@ -72,47 +76,67 @@ def dashboard_cliente():
                            materiales=lista_materiales, 
                            zonas=lista_zonas)
 
+
 @admin.route('/dashboard')
 @login_requerido
 def dashboard():
     from app import mysql
+    
     if not session.get('logeado'):
         return redirect(url_for('admin.enlogin'))
         
     cursor = None
+    
     try:
         cursor = mysql.connection.cursor()
         
         cursor.execute("SELECT id, username, rol FROM usuarios")
         lista_usuarios = cursor.fetchall()
         
-        cursor.execute("SELECT id, costo_material, costo_transporte, costo_maquinaria, total FROM pedidos ORDER BY id DESC")
+        cursor.execute("""
+            SELECT id, costo_material, costo_transporte, costo_maquinaria, total 
+            FROM pedidos 
+            ORDER BY id DESC
+        """)
         lista_pedidos = cursor.fetchall()
         
         # MODIFICADO (Opción B): Traer maquinaria unificada incluyendo placa, capacidad y el nombre de su operador asignado
         cursor.execute("""
-            SELECT m.id, m.codigo_maquina, m.tipo, m.estado, m.horas_totales, m.placa, m.capacidad, u.username 
+            SELECT m.id, m.codigo_maquina, m.tipo, m.estado, 
+                   m.horas_totales, m.placa, m.capacidad, u.username 
             FROM maquinaria m
             LEFT JOIN usuarios u ON m.operador_id = u.id
         """)
         lista_maquinaria = cursor.fetchall()
 
+
         # NUEVO: Traer Catálogo de Materiales para el Administrador
-        cursor.execute("SELECT id, nombre, descripcion FROM materiales ORDER BY id DESC")
+        cursor.execute("""
+            SELECT id, nombre, descripcion 
+            FROM materiales 
+            ORDER BY id DESC
+        """)
         lista_materiales = cursor.fetchall()
 
+
         # NUEVO: Traer Zonas y Tarifas para el Administrador
-        cursor.execute("SELECT id, zona, tarifa FROM zonas_tarifas ORDER BY id DESC")
+        cursor.execute("""
+            SELECT id, zona, tarifa 
+            FROM zonas_tarifas 
+            ORDER BY id DESC
+        """)
         lista_zonas = cursor.fetchall()
 
-        # NUEVO: Traer los usuarios que tengan rol de 'Operador' o 'Chofer' para poder asignarlos
-                # NUEVO: Traer los usuarios que contengan en su rol la palabra 'chofer' u 'operador' de forma flexible
+
+        # NUEVO: Traer los usuarios que tengan rol de Operador o Chofer
         cursor.execute("""
             SELECT id, username 
             FROM usuarios 
-            WHERE rol LIKE '%chofer%' OR rol LIKE '%operador%' OR rol LIKE '%Chofer%' OR rol LIKE '%Operador%'
+            WHERE rol LIKE '%chofer%' 
+            OR rol LIKE '%operador%'
         """)
         lista_operadores = cursor.fetchall()
+
 
         cursor.close()
         cursor = None 
@@ -129,16 +153,28 @@ def dashboard():
         
     except Exception as e:
         flash(f"Error en la base de datos dentro del Dashboard: {str(e)}", "error")
-        return render_template("admin/dashboard.html", usuarios=[], pedidos=[], maquinarias=[], materiales=[], zonas=[], operadores=[])
+        return render_template(
+            "admin/dashboard.html",
+            usuarios=[],
+            pedidos=[],
+            maquinarias=[],
+            materiales=[],
+            zonas=[],
+            operadores=[]
+        )
         
     finally:
-        if cursor is not None and cursor:
+        if cursor is not None:
             cursor.close()
+
+
 
 @admin.route('/logout')
 def logout():
     session.clear()
     return redirect(url_for('admin.enlogin'))
+
+
 
 @admin.route('/crear-pedido', methods=['POST'])
 def crear_pedido():
@@ -151,34 +187,47 @@ def crear_pedido():
     horas_retro = float(request.form.get('horas_retro') or 0)
     
     costo_maquinaria = 0.0
+    
     if horas_retro > 0:
         if horas_retro < 2:
-            horas_retro = 2.0  
+            horas_retro = 2.0
+            
         costo_maquinaria = horas_retro * 40.0
         
     total_final = costo_material + costo_transporte + costo_maquinaria
     
+    
     from app import mysql
+    
     cursor = mysql.connection.cursor()
+    
     try:
         cursor.execute("""
-            INSERT INTO pedidos (costo_material, costo_transporte, costo_maquinaria, total) 
+            INSERT INTO pedidos 
+            (costo_material, costo_transporte, costo_maquinaria, total) 
             VALUES (%s, %s, %s, %s)
-        """, (costo_material, costo_transporte, costo_maquinaria, total_final))
+        """, 
+        (costo_material, costo_transporte, costo_maquinaria, total_final))
+        
         
         mysql.connection.commit()
         flash("¡Tu cotización y pedido han sido procesados con éxito!", "success")
+        
     except Exception as e:
         mysql.connection.rollback()
         flash(f"Error al procesar el pedido en el sistema: {str(e)}", "error")
+        
     finally:
         cursor.close()
         
     return redirect(url_for('admin.dashboard_cliente'))
 
+
+# NUEVA RUTA: ACTUALIZAR ESTADO Y HORAS DE MAQUINARIA NO FUNCIONAL TOAVIA
 @admin.route('/actualizar-maquinaria', methods=['POST'])
 def actualizar_maquinaria():
     from app import mysql
+    
     if not session.get('logeado'):
         return redirect(url_for('admin.enlogin'))
         
@@ -187,18 +236,22 @@ def actualizar_maquinaria():
     horas_nuevas = int(request.form.get('horas_nuevas', 0))
     
     cursor = mysql.connection.cursor()
+    
     try:
         cursor.execute("""
             UPDATE maquinaria 
             SET estado = %s, horas_totales = horas_totales + %s 
             WHERE id = %s
-        """, (nuevo_estado, horas_nuevas, id_maquina))
+        """, 
+        (nuevo_estado, horas_nuevas, id_maquina))
         
         mysql.connection.commit()
         flash("Maquinaria actualizada correctamente", "success")
+        
     except Exception as e:
         mysql.connection.rollback()
         flash(f"Error al actualizar la maquinaria: {str(e)}", "error")
+        
     finally:
         cursor.close()
         
@@ -209,6 +262,7 @@ def actualizar_maquinaria():
 @login_requerido
 def asignar_operador():
     from app import mysql
+    
     id_maquina = request.form.get('id_maquina')
     id_operador = request.form.get('id_operador')
     
@@ -216,162 +270,147 @@ def asignar_operador():
         id_operador = None
 
     cursor = mysql.connection.cursor()
+    
     try:
-        cursor.execute("UPDATE maquinaria SET operador_id = %s WHERE id = %s", (id_operador, id_maquina))
+        cursor.execute(
+            "UPDATE maquinaria SET operador_id = %s WHERE id = %s",
+            (id_operador, id_maquina)
+        )
+        
         mysql.connection.commit()
         flash("Operador asignado con éxito a la unidad.", "success")
+        
     except Exception as e:
         mysql.connection.rollback()
         flash(f"Error al asignar el operador: {str(e)}", "error")
-    finally:
-        cursor.close()
-    return redirect(url_for('admin.dashboard'))
-
-# NUEVA RUTA: GUARDAR NUEVO MATERIAL EN EL CATÁLOGO
-@admin.route('/materiales/guardar', methods=['POST'])
-@login_requerido
-def guardar_material():
-    from app import mysql
-    nombre = request.form.get('nombre')
-    descripcion = request.form.get('descripcion')
-    
-    cursor = mysql.connection.cursor()
-    try:
-        cursor.execute("INSERT INTO materiales (nombre, descripcion) VALUES (%s, %s)", (nombre, descripcion))
-        mysql.connection.commit()
-        flash("Material guardado en el catálogo.", "success")
-    except Exception as e:
-        mysql.connection.rollback()
-        flash(f"Error al guardar material: {str(e)}", "error")
-    finally:
-        cursor.close()
-    return redirect(url_for('admin.dashboard'))
-
-# NUEVA RUTA: GUARDAR NUEVA ZONA Y TARIFA
-@admin.route('/zonas/guardar', methods=['POST'])
-@login_requerido
-def guardar_zona():
-    from app import mysql
-    zona = request.form.get('zona')
-    tarifa = request.form.get('tarifa')
-    
-    cursor = mysql.connection.cursor()
-    try:
-        cursor.execute("INSERT INTO zonas_tarifas (zona, tarifa) VALUES (%s, %s)", (zona, float(tarifa)))
-        mysql.connection.commit()
-        flash("Zona y tarifa añadidas con éxito.", "success")
-    except Exception as e:
-        mysql.connection.rollback()
-        flash(f"Error al registrar zona: {str(e)}", "error")
-    finally:
-        cursor.close()
-    return redirect(url_for('admin.dashboard'))
-
-# ELIMINAR USUARIOS 
-@admin.route('/eliminar-usuario/<int:id_usuario>', methods=['POST'])
-@login_requerido
-def eliminar_usuario(id_usuario):
-    from app import mysql
-    if session.get('usuario') == request.form.get('username_eliminar'):
-        flash('No puedes eliminar tu propia cuenta de usuario en sesión.', 'error')
-        return redirect(url_for('admin.dashboard'))
-
-    cursor = mysql.connection.cursor()
-    try:
-        cursor.execute("DELETE FROM usuarios WHERE id = %s", (id_usuario,))
-        mysql.connection.commit()
-        flash('Usuario eliminado del sistema correctamente.', 'success')
-    except Exception as e:
-        mysql.connection.rollback()
-        flash(f'Error al eliminar el usuario: {str(e)}', 'error')
+        
     finally:
         cursor.close()
         
     return redirect(url_for('admin.dashboard'))
 
 
-@admin.route('/asignar-operador', methods=['POST'])
-@login_requerido
-def asignar_operador_unidad():  # <--- Cambiado el nombre aquí para evitar choque
-    from app import mysql
-    id_maquina = request.form.get('id_maquina')
-    id_operador = request.form.get('id_operador')
-    
-    if id_operador == "":
-        id_operador = None
 
-    cursor = mysql.connection.cursor()
-    try:
-        cursor.execute("UPDATE maquinaria SET operador_id = %s WHERE id = %s", (id_operador, id_maquina))
-        mysql.connection.commit()
-        flash("Operador asignado con éxito a la unidad.", "success")
-    except Exception as e:
-        mysql.connection.rollback()
-        flash(f"Error al asignar el operador: {str(e)}", "error")
-    finally:
-        cursor.close()
-    return redirect(url_for('admin.dashboard'))
-
-
-# --- 2. GUARDAR MATERIAL ---
+# NUEVA RUTA: GUARDAR NUEVO MATERIAL EN EL CATÁLOGO
 @admin.route('/materiales/guardar', methods=['POST'])
 @login_requerido
-def guardar_catalogo_material():  # <--- Nombre único
+def guardar_material():
     from app import mysql
+    
     nombre = request.form.get('nombre')
     descripcion = request.form.get('descripcion')
     
     cursor = mysql.connection.cursor()
+    
     try:
-        cursor.execute("INSERT INTO materiales (nombre, descripcion) VALUES (%s, %s)", (nombre, descripcion))
+        cursor.execute(
+            "INSERT INTO materiales (nombre, descripcion) VALUES (%s, %s)",
+            (nombre, descripcion)
+        )
+        
         mysql.connection.commit()
         flash("Material guardado en el catálogo.", "success")
+        
     except Exception as e:
         mysql.connection.rollback()
         flash(f"Error al guardar material: {str(e)}", "error")
+        
     finally:
         cursor.close()
+        
     return redirect(url_for('admin.dashboard'))
 
 
-# --- 3. GUARDAR ZONA Y TARIFA ---
+
+# NUEVA RUTA: GUARDAR NUEVA ZONA Y TARIFA
 @admin.route('/zonas/guardar', methods=['POST'])
 @login_requerido
-def guardar_nueva_zona_tarifa():  # <--- Nombre único
+def guardar_zona():
     from app import mysql
+    
     zona = request.form.get('zona')
     tarifa = request.form.get('tarifa')
     
     cursor = mysql.connection.cursor()
+    
     try:
-        cursor.execute("INSERT INTO zonas_tarifas (zona, tarifa) VALUES (%s, %s)", (zona, float(tarifa)))
+        cursor.execute(
+            "INSERT INTO zonas_tarifas (zona, tarifa) VALUES (%s, %s)",
+            (zona, float(tarifa))
+        )
+        
         mysql.connection.commit()
         flash("Zona y tarifa añadidas con éxito.", "success")
+        
     except Exception as e:
         mysql.connection.rollback()
         flash(f"Error al registrar zona: {str(e)}", "error")
+        
     finally:
         cursor.close()
+        
     return redirect(url_for('admin.dashboard'))
 
 
-# --- 4. CREAR NUEVO USUARIO ---
+
+# ELIMINAR USUARIOS
+@admin.route('/eliminar-usuario/<int:id_usuario>', methods=['POST'])
+@login_requerido
+def eliminar_usuario(id_usuario):
+    from app import mysql
+    
+    if session.get('usuario') == request.form.get('username_eliminar'):
+        flash('No puedes eliminar tu propia cuenta de usuario en sesión.', 'error')
+        return redirect(url_for('admin.dashboard'))
+
+    cursor = mysql.connection.cursor()
+    
+    try:
+        cursor.execute(
+            "DELETE FROM usuarios WHERE id = %s",
+            (id_usuario,)
+        )
+        
+        mysql.connection.commit()
+        flash('Usuario eliminado del sistema correctamente.', 'success')
+        
+    except Exception as e:
+        mysql.connection.rollback()
+        flash(f'Error al eliminar el usuario: {str(e)}', 'error')
+        
+    finally:
+        cursor.close()
+        
+    return redirect(url_for('admin.dashboard'))
+
+
+
+# CREAR NUEVO USUARIO
 @admin.route('/crear-usuario', methods=['POST'])
 @login_requerido
-def crear_usuario():  # <-- Déjalo con este nombre exacto
-    from app import mysql # <--- Nombre único
+def crear_usuario():
+    from app import mysql
+    
     username = request.form.get('username')
     password = request.form.get('password')
     rol = request.form.get('rol')
     
     cursor = mysql.connection.cursor()
+    
     try:
-        cursor.execute("INSERT INTO usuarios (username, password, rol) VALUES (%s, %s, %s)", (username, password, rol))
+        cursor.execute(
+            "INSERT INTO usuarios (username, password, rol) VALUES (%s, %s, %s)",
+            (username, password, rol)
+        )
+        
         mysql.connection.commit()
         flash("Nuevo usuario registrado correctamente.", "success")
+        
     except Exception as e:
         mysql.connection.rollback()
         flash(f"Error al registrar usuario: {str(e)}", "error")
+        
     finally:
         cursor.close()
+        
     return redirect(url_for('admin.dashboard'))
