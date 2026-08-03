@@ -12,7 +12,7 @@ VALUES ('admin','1234','Administrador');
 
 CREATE TABLE materiales (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    nombre VARCHAR(100) NOT NULL,
+    nombre_material VARCHAR(100) NOT NULL,
     descripcion TEXT
 );
 

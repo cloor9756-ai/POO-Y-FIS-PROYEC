@@ -155,419 +155,382 @@
         .btn-delete:hover { background: #dc3545; color: white; }
     </style>
 
-</head>
-<body>
+    </head>
+    <body>
 
     <!-- Barra Lateral Única -->
     <div class="sidebar">
-    <div id="btn-dash" class="menu-item active" onclick="cambiarSeccion('sec-dash', this)">
-        <i class="fa-solid fa-chart-pie"></i> Dashboard
-    </div>
-    <div class="menu-item" onclick="cambiarSeccion('sec-pedidos', this)">
+    <button class="menu-item active" onclick="cambiarSeccion('sec-dash', this)">
+        <i class="fa-solid fa-chart-line"></i> Dashboard
+    </button>
+    
+    <button class="menu-item" onclick="cambiarSeccion('sec-pedidos', this)">
         <i class="fa-solid fa-truck-ramp-box"></i> Pedidos Material
-    </div>
+    </button>
+
+    <!-- ESTE ES EL NUEVO BOTÓN QUE DEBES AGREGAR -->
+    <button class="menu-item" onclick="cambiarSeccion('sec-materiales', this)">
+        <i class="fa-solid fa-boxes-stacked"></i> Catálogo Materiales
+    </button>
     
-    <!-- ÚNICO BOTÓN LOGÍSTICO INTEGRADO -->
-    <div class="menu-item" onclick="cambiarSeccion('sec-maquinaria', this)">
+    <button class="menu-item" onclick="cambiarSeccion('sec-maquinaria', this)">
         <i class="fa-solid fa-screwdriver-wrench"></i> Maquinaria y Volquetas
-    </div>
+    </button>
     
-    <div class="menu-item" onclick="cambiarSeccion('sec-personal', this)">
+    <button class="menu-item" onclick="cambiarSeccion('sec-personal', this)">
         <i class="fa-solid fa-users"></i> Control Personal
-    </div>
-    
-    <a href="{{ url_for('admin.logout') }}" class="menu-item logout">
-        <i class="fa-solid fa-right-from-bracket"></i> Cerrar Sesión
+    </button>
+
+    <div style="position: absolute; bottom: 20px; left: 15px; width: calc(100% - 30px);">
+    <a href="{{ url_for('admin.logout') }}" style="color: #ff4d4d; text-decoration: none; display: flex; align-items: center; gap: 8px; font-weight: bold; font-family: sans-serif;">
+        <svg xmlns="http://w3.org" width="18" height="18" fill="currentColor" viewBox="0 0 16 16">
+            <path fill-rule="evenodd" d="M6 12.5a.5.5 0 0 0 .5.5h8a.5.5 0 0 0 .5-.5v-9a.5.5 0 0 0-.5-.5h-8a.5.5 0 0 0-.5.5v2a.5.5 0 0 1-1 0v-2A1.5 1.5 0 0 1 6.5 2h8A1.5 1.5 0 0 1 16 3.5v9a1.5 1.5 0 0 1-1.5 1.5h-8A1.5 1.5 0 0 1 5 12.5v-2a.5.5 0 0 1 1 0z"/>
+            <path fill-rule="evenodd" d="M.146 8.354a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L1.707 7.5H10.5a.5.5 0 0 1 0 1H1.707l2.147 2.146a.5.5 0 0 1-.708.708z"/>
+        </svg>
+        <span>Cerrar Sesión</span>
     </a>
+</div>
 </div>
 
 
-    <!-- Contenido Principal -->
-    <div class="main-content">
-        <div class="header">
-            <h1 id="titulo-panel">Panel de Control Principal</h1>
-            <div class="user-info">
-                <i class="fa-solid fa-circle-user fa-xl" style="color: #0072ff;"></i>
-                <span>{{ session.get('usuario') }} (Administrador)</span>
-            </div>
-        </div>
-
-        <!-- Alertas Flash -->
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                <div id="flash-container">
-                    {% for category, message in messages %}
-                        <div class="flash-message alert-{{ category }}">
-                            {% if category == 'error' %}⚠️{% else %}✅{% endif %} {{ message }}
-                        </div>
-                    {% endfor %}
+        <!-- Contenido Principal -->
+        <div class="main-content">
+            <div class="header">
+                <h1 id="titulo-panel">Panel de Control Principal</h1>
+                <div class="user-info">
+                    <i class="fa-solid fa-circle-user fa-xl" style="color: #0072ff;"></i>
+                    <span>{{ session.get('usuario') }} (Administrador)</span>
                 </div>
-            {% endif %}
-        {% endwith %}
+            </div>
 
-       <!-- ================= SECCIÓN 1: DASHBOARD (MÉTRICAS) ================= -->
-        <div id="sec-dash" class="section-panel">
-            <div class="cards-grid">
-                <div class="card">
-                    <div class="card-info">
-                        <h3>Pedidos Activos</h3>
-                        <p>{{ pedidos|length }}</p>
+            <!-- Alertas Flash -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div id="flash-container">
+                        {% for category, message in messages %}
+                            <div class="flash-message alert-{{ category }}">
+                                {% if category == 'error' %}⚠️{% else %}✅{% endif %} {{ message }}
+                            </div>
+                        {% endfor %}
                     </div>
-                    <div class="card-icon"><i class="fa-solid fa-truck"></i></div>
-                </div>
-                <div class="card">
-                    <div class="card-info"><h3>Motor MySQL</h3><p>CONECTADO</p></div>
-                    <div class="card-icon" style="color: #2ecc71; background: rgba(46,204,113,0.1);"><i class="fa-solid fa-database"></i></div>
-                </div>
-                <div class="card">
-                    <div class="card-info"><h3>Servicios API</h3><p>Google Maps</p></div>
-                    <div class="card-icon" style="color: #9b59b6; background: rgba(155,89,182,0.1);"><i class="fa-solid fa-map-location-dot"></i></div>
+                {% endif %}
+            {% endwith %}
+
+        <!-- ================= SECCIÓN 1: DASHBOARD (MÉTRICAS) ================= -->
+            <div id="sec-dash" class="section-panel">
+                <div class="cards-grid">
+                    <div class="card">
+                        <div class="card-info">
+                            <h3>Pedidos Activos</h3>
+                            <p>{{ pedidos|length }}</p>
+                        </div>
+                        <div class="card-icon"><i class="fa-solid fa-truck"></i></div>
+                    </div>
+                    <div class="card">
+                        <div class="card-info"><h3>Motor MySQL</h3><p>CONECTADO</p></div>
+                        <div class="card-icon" style="color: #2ecc71; background: rgba(46,204,113,0.1);"><i class="fa-solid fa-database"></i></div>
+                    </div>
+                    <div class="card">
+                        <div class="card-info"><h3>Servicios API</h3><p>Google Maps</p></div>
+                        <div class="card-icon" style="color: #9b59b6; background: rgba(155,89,182,0.1);"><i class="fa-solid fa-map-location-dot"></i></div>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- ================= SECCIÓN 2: PEDIDOS (HISTORIAL) ================= -->
-        <div id="sec-pedidos" class="section-panel" style="display: none;">
-            <div class="table-container">
-                <h2><i class="fa-solid fa-truck-ramp-box"></i> Historial de Pedidos y Cotizaciones</h2>
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Costo Material</th>
-                            <th>Costo Transporte</th>
-                            <th>Costo Maquinaria</th>
-                            <th>Total</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for ped in pedidos %}
-                        <tr>
-                            <td>{{ ped[0] }}</td>
-                            <td>$ {{ "{:,.2f}".format(ped[1]) }}</td>
-                            <td>$ {{ "{:,.2f}".format(ped[2]) }}</td>
-                            <td>$ {{ "{:,.2f}".format(ped[3]) }}</td>
-                            <td>$ {{ "{:,.2f}".format(ped[4]) }}</td>
-                            <!-- BOTON ELIMINAR PEDIDO no funcional todavia -->
-                            <td>
-                                    <button type="submit" class="btn-delete" style="background: none; border: none; color: #ff4d4d; cursor: pointer;">
-                                        <i class="fa-solid fa-trash"></i> Borrar
-                                    </button>
-                                </form>
-
-                            <!-- BOTON  de estado(confirmado-en caino-entregado) no funcional todavia -->
-                             <button type="submit" class="btn-delete" style="background: none; border: none; color: #4dffa6; cursor: pointer;">
-                                        <i class="fa-solid fa-truck"></i> Cambiar Estado
-                                    </button>
-                                </form>
-
-
-                            </td>
-                        </tr>
-                        {% else %}
-                        <tr>
-                            <td colspan="5" style="text-align: center; color: #888; padding: 15px;">No hay pedidos registrados en el sistema.</td>
-                        </tr>
-                        {% endfor %}
-                        
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    
-        <!-- ================= SECCIÓN 3: MAQUINARIA Y VOLQUETAS ================= -->
-        <div id="sec-maquinaria" class="section-panel" style="display: none;">
-            <div class="table-container" style="margin-bottom: 40px;">
-                <h2><i class="fa-solid fa-screwdriver-wrench"></i> Control de Maquinaria y Volquetas</h2>
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Código</th>
-                            <th>Tipo</th>
-                            <th>Placa</th>
-                            <th>Capacidad (m³)</th>
-                            <th>Estado</th>
-                            <th>Operador / Chofer</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for maq in maquinarias %}
-                        <tr>
-                            <td>{{ maq[0] }}</td>
-                            <td>{{ maq[1] }}</td>
-                            <td>{{ maq[2] }}</td>
-                            <td>{{ maq[5] if maq[5] else 'N/A' }}</td>
-                            <td>{{ maq[6] if maq[6] else 'N/A' }}</td>
-                            <td>{{ maq[3] }}</td>
-                                <!-- BOTON eliminar OPERADOR no funcional todavia -->
-                            <td>
-
-                                {% if maq[7] %}
-                                    <form action="/eliminar-operador" method="POST" style="display:inline;">
-                                        <input type="hidden" name="id_maquina" value="{{ maq[0] }}">
-                                        <button type="submit" class="btn-delete" style="background: none; border: none; color: #ff4d4d; cursor: pointer;">
-                                            <i class="fa-solid fa-trash"></i> Quitar
-                                        </button>
-                                    </form>
-                                {% endif %}               
-                            <td>
-                                <form action="/asignar-operador" method="POST" style="display:inline;">
-                                    <input type="hidden" name="id_maquina" value="{{ maq[0] }}">
-                                    <select name="id_operador" onchange="this.form.submit()" style="background: #222; color: #fff; border: 1px solid #555; padding: 4px; border-radius: 4px; cursor: pointer;">
-                                        <option value="">-- Sin Asignar --</option>
-                                        {% for op in operadores %}
-                                            <option value="{{ op[0] }}" {% if maq[7] == op[1] %} selected {% endif %}>{{ op[1] }}</option>
-                                        {% endfor %}
-                                    </select>
-                                </form>
-                            </td>
-                        </tr>
-                        {% else %}
-                        <tr>
-                            <td colspan="7" style="text-align: center; color: #888; padding: 15px;">No hay maquinaria registrada en el sistema.</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- ================= SECCIÓN 4: CONTROL DE PERSONAL ================= -->
-        <div id="sec-personal" class="section-panel" style="display: none;">
-            <div style="display: flex; gap: 20px; flex-wrap: wrap;">
-                
-                <!-- Tabla de Usuarios -->
-                <div class="table-container" style="flex: 1.5; min-width: 400px;">
-                    <h2>Usuarios con Acceso al Sistema</h2>
+            <!-- ================= SECCIÓN 2: PEDIDOS (HISTORIAL) ================= -->
+            <div id="sec-pedidos" class="section-panel" style="display: none;">
+                <div class="table-container">
+                    <h2><i class="fa-solid fa-truck-ramp-box"></i> Historial de Pedidos y Cotizaciones</h2>
                     <table class="data-table">
                         <thead>
                             <tr>
                                 <th>ID</th>
-                                <th>Nombre de Usuario</th>
-                                <th>Rol</th>
+                                <th>Costo Material</th>
+                                <th>Costo Transporte</th>
+                                <th>Costo Maquinaria</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for ped in pedidos %}
+                            <tr>
+                                <td>{{ ped[0] }}</td>
+                                <td>$ {{ "{:,.2f}".format(ped[1]) }}</td>
+                                <td>$ {{ "{:,.2f}".format(ped[2]) }}</td>
+                                <td>$ {{ "{:,.2f}".format(ped[3]) }}</td>
+                                <td>$ {{ "{:,.2f}".format(ped[4]) }}</td>
+                                <!-- BOTON ELIMINAR PEDIDO no funcional todavia -->
+                                <td>
+                                    <button type="button"
+                                            style="background:none;border:none;color:#ff4d4d;cursor:pointer;">
+                                        <i class="fa-solid fa-trash"></i> Borrar
+                                    </button>
+
+                                    <button type="button"
+                                            style="background:none;border:none;color:#4dffa6;cursor:pointer;margin-left:10px;">
+                                        <i class="fa-solid fa-truck"></i> Cambiar Estado
+                                    </button>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="5" style="text-align: center; color: #888; padding: 15px;">No hay pedidos registrados en el sistema.</td>
+                            </tr>
+                            {% endfor %}
+                            
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        
+            <!-- ================= SECCIÓN 3: MAQUINARIA Y VOLQUETAS ================= -->
+            <div id="sec-maquinaria" class="section-panel" style="display: none;">
+                <div class="table-container" style="margin-bottom: 40px;">
+                    <h2><i class="fa-solid fa-screwdriver-wrench"></i> Control de Maquinaria y Volquetas</h2>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Código</th>
+                                <th>Tipo</th>
+                                <th>Placa</th>
+                                <th>Capacidad (m³)</th>
+                                <th>Estado</th>
+                                <th>Operador / Chofer</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for maq in maquinarias %}
+                                <tr>
+                                    <td>{{ maq[0] }}</td>
+                                    <td>{{ maq[1] }}</td>
+                                    <td>{{ maq[2] }}</td>
+                                    <td>{{ maq[5] if maq[5] else 'N/A' }}</td>
+                                    <td>{{ maq[6] if maq[6] else 'N/A' }}</td>
+                                    <td>{{ maq[3] }}</td>
+
+                                    <td>
+                                        {% if maq[7] %}
+                                        <form action="/eliminar-operador" method="POST" style="display:inline;">
+                                            <input type="hidden" name="id_maquina" value="{{ maq[0] }}">
+                                            <button type="submit"
+                                                    class="btn-delete"
+                                                    style="background:none;border:none;color:#ff4d4d;cursor:pointer;">
+                                                <i class="fa-solid fa-trash"></i> Quitar
+                                            </button>
+                                        </form>
+                                        {% endif %}
+                                    </td>
+                                   <td>
+                                        <form action="/asignar-operador" method="POST" style="display:inline;">
+                                            <input type="hidden" name="id_maquina" value="{{ maq[0] }}">
+                                            <select name="id_operador"
+                                                    onchange="this.form.submit()"
+                                                    style="background:#222;color:#fff;border:1px solid #555;padding:4px;border-radius:4px;cursor:pointer;">
+                                                <option value="">-- Sin Asignar --</option>
+
+                                                {% for op in operadores %}
+                                                <option value="{{ op[0] }}"
+                                                    {% if maq[7] == op[1] %}selected{% endif %}>
+                                                    {{ op[1] }}
+                                                </option>
+                                                {% endfor %}
+                                            </select>
+                                        </form>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody> 
+                    </table> 
+                </div>
+            </div> 
+
+              <!-- ================= SECCIÓN 6: GESTION DE CATALOGO DE MATERIALES ================= -->
+                <div id="sec-materiales" class="section-panel" style="display: none;">
+                <div class="table-container">
+                    <h2><i class="fa-solid fa-boxes-stacked"></i> Gestión de Catálogo de Materiales</h2>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre del Material</th>
+                                <th>Precio por m³</th>
                                 <th>Acción</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {% for usu in usuarios %}
+                            {% for material in materiales %}
                             <tr>
-                                <td>{{ usu[0] }}</td>
-                                <td>{{ usu[1] }}</td>
-                                <td>{{ usu[2] }}</td>
+                                <td>{{ material[0] }}</td>
+                                <td>{{ material[1] }}</td>
+                                <td>$ {{ "{:,.2f}".format(material[2]) }}</td>
                                 <td>
-                                    <form action="{{ url_for('admin.eliminar_usuario', id_usuario=usu[0]) }}" method="POST" style="display:inline;">
-                                        <input type="hidden" name="username_eliminar" value="{{ usu[1] }}">
+                                    <!-- BOTON eliminar MATERIAL no funcional todavia -->
+                                    <form action="/eliminar-material" method="POST" style="display:inline;">
+                                        <input type="hidden" name="id_material" value="{{ material[0] }}">
                                         <button type="submit" class="btn-delete" style="background: none; border: none; color: #ff4d4d; cursor: pointer;">
                                             <i class="fa-solid fa-trash"></i> Borrar
                                         </button>
                                     </form>
                                 </td>
                             </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="4" style="text-align: center; color: #888; padding: 15px;">No hay materiales registrados en el sistema.</td>
+                            </tr>
                             {% endfor %}
                         </tbody>
                     </table>
-                </div>
 
-                <!-- Formulario de Registro -->
-                <div class="table-container" style="flex: 1; min-width: 300px;">
-                    <h2>Registrar un Nuevo Usuario (Operador/Admin)</h2>
-                    <form action="{{ url_for('admin.crear_usuario') }}" method="POST">
-                        <div style="margin-bottom: 15px;">
-                            <label>Nombre de Usuario</label>
-                            <input type="text" name="username" required>
-                        </div>
-                        <div style="margin-bottom: 15px;">
-                            <label>Contraseña Temporal</label>
-                            <input type="password" name="password" required>
-                        </div>
-                        <div style="margin-bottom: 20px;">
-                            <label>Rol de Sistema</label>
-                            <select name="rol">
-                                <option value="Administrador">Administrador</option>
-                                <option value="Chofer de volqueta">Chofer de volqueta</option>
-                                <option value="Operador de retroexcavadoras">Operador de retroexcavadoras</option>
-                                <option value="Cliente">Cliente</option>
-                            </select>
-                        </div>
-                        <button type="submit" class="btn-submit-panel" style="width: 100%;">Crear Cuenta Oficial</button>
-                    </form>
+                    <!-- Formulario para agregar nuevo material -->
+                    <div style="margin-top: 30px;">
+                        <h3>Agregar Nuevo Material</h3>
+                       <form action="/materiales/guardar" method="POST">
+                            <div style="margin-bottom: 15px;">
+                                <label>Nombre del Material</label>
+                                <input type="text" name="nombre_material" required>
+                            </div>
+                            <div style="margin-bottom: 15px;">
+                                <label>Descripción</label>
+                                <input type="text" name="descripcion" required>
+                            </div>
+                            <div style="margin-bottom: 15px;">
+                                <label>Precio por m³</label>
+                                <input type="number"
+                                    step="0.01"
+                                name="precio_m3"
+                                required>
+                            </div>
+                            <button type="submit" class="btn-submit-panel" style="width: 100%;"> Guardar Material </button>
+                        </form>
+                    </div>
                 </div>
+     </div> <!-- cierre del cierre de panel lateral-->
 
+                <!-- ================= SECCIÓN 5: GESTIONAR ZONA Y TARIFAS ================= -->
+    
+
+
+            <!-- ================= SECCIÓN 4: CONTROL DE PERSONAL ================= -->
+            <div id="sec-personal" class="section-panel" style="display: none;">
+                <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+                    
+                    <!-- Tabla de Usuarios -->
+                    <div class="table-container" style="flex: 1.5; min-width: 400px;">
+                        <h2>Usuarios con Acceso al Sistema</h2>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Nombre de Usuario</th>
+                                    <th>Rol</th>
+                                    <th>Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for usu in usuarios %}
+                                <tr>
+                                    <td>{{ usu[0] }}</td>
+                                    <td>{{ usu[1] }}</td>
+                                    <td>{{ usu[2] }}</td>
+                                    <td>
+                                        <form action="{{ url_for('admin.eliminar_usuario', id_usuario=usu[0]) }}" method="POST" style="display:inline;">
+                                            <input type="hidden" name="username_eliminar" value="{{ usu[1] }}">
+                                            <button type="submit" class="btn-delete" style="background: none; border: none; color: #ff4d4d; cursor: pointer;">
+                                                <i class="fa-solid fa-trash"></i> Borrar
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Formulario de Registro -->
+                    <div class="table-container" style="flex: 1; min-width: 300px;">
+                        <h2>Registrar un Nuevo Usuario (Operador/Admin)</h2>
+                        <form action="{{ url_for('admin.crear_usuario') }}" method="POST">
+                            <div style="margin-bottom: 15px;">
+                                <label>Nombre de Usuario</label>
+                                <input type="text" name="username" required>
+                            </div>
+                            <div style="margin-bottom: 15px;">
+                                <label>Contraseña Temporal</label>
+                                <input type="password" name="password" required>
+                            </div>
+                            <div style="margin-bottom: 20px;">
+                                <label>Rol de Sistema</label>
+                                <select name="rol">
+                                    <option value="Administrador">Administrador</option>
+                                    <option value="Chofer de volqueta">Chofer de volqueta</option>
+                                    <option value="Operador de retroexcavadoras">Operador de retroexcavadoras</option>
+                                    <option value="Cliente">Cliente</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn-submit-panel" style="width: 100%;">Crear Cuenta Oficial</button>
+                        </form>
+                    </div>
+
+                </div>
             </div>
-        </div>
 
-    </div>
-
-
-
-            <!-- ================= SECCIÓN 5: GESTIONAR ZONA Y TARIFAS ================= -->
-            <div id="sec-zona" class="section-panel" style="display: none;">
-            <div class="table-container">
-                <h2><i class="fa-solid fa-map-location-dot"></i> Gestión de Zonas y Tarifas</h2>
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Zona</th>
-                            <th>Tarifa por m³</th>
-                            <th>Acción</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for zona in zonas %}
-                        <tr>
-                            <td>{{ zona[0] }}</td>
-                            <td>{{ zona[1] }}</td>
-                            <td>$ {{ "{:,.2f}".format(zona[2]) }}</td>
-                            <td>
-                                <!-- BOTON eliminar ZONA no funcional todavia -->
-                                <form action="/eliminar-zona" method="POST" style="display:inline;">
-                                    <input type="hidden" name="id_zona" value="{{ zona[0] }}">
-                                    <button type="submit" class="btn-delete" style="background: none; border: none; color: #ff4d4d; cursor: pointer;">
-                                        <i class="fa-solid fa-trash"></i> Borrar
-                                    </button>
-                                </form>
-                            </td>
-                        </tr>
-                        {% else %}
-                        <tr>
-                            <td colspan="4" style="text-align: center; color: #888; padding: 15px;">No hay zonas registradas en el sistema.</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-
-                <!-- Formulario para agregar nueva zona -->
-                <div style="margin-top: 30px;">
-                    <h3>Agregar Nueva Zona</h3>
-                    <form action="/agregar-zona" method="POST">
-                        <div style="margin-bottom: 15px;">
-                            <label>Nombre de la Zona</label>
-                            <input type="text" name="nombre_zona" required>
-                        </div>
-                        <div style="margin-bottom: 20px;">
-                            <label>Tarifa por m³</label>
-                            <input type="number" step="0.01" name="tarifa_m3" required>
-                        </div>
-                        <button type="submit" class="btn-submit-panel">Agregar Zona</button>
-                    </form>
-                </div>
-
-
-
-            <!-- ================= SECCIÓN 6: GESTION DE CATALOGO DE MATERIALES ================= -->
-                    <div id="sec-materiales" class="section-panel" style="display: none;">
-            <div class="table-container">
-                <h2><i class="fa-solid fa-boxes-stacked"></i> Gestión de Catálogo de Materiales</h2>
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Nombre del Material</th>
-                            <th>Precio por m³</th>
-                            <th>Acción</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for material in materiales %}
-                        <tr>
-                            <td>{{ material[0] }}</td>
-                            <td>{{ material[1] }}</td>
-                            <td>$ {{ "{:,.2f}".format(material[2]) }}</td>
-                            <td>
-                                <!-- BOTON eliminar MATERIAL no funcional todavia -->
-                                <form action="/eliminar-material" method="POST" style="display:inline;">
-                                    <input type="hidden" name="id_material" value="{{ material[0] }}">
-                                    <button type="submit" class="btn-delete" style="background: none; border: none; color: #ff4d4d; cursor: pointer;">
-                                        <i class="fa-solid fa-trash"></i> Borrar
-                                    </button>
-                                </form>
-                            </td>
-                        </tr>
-                        {% else %}
-                        <tr>
-                            <td colspan="4" style="text-align: center; color: #888; padding: 15px;">No hay materiales registrados en el sistema.</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-
-                <!-- Formulario para agregar nuevo material -->
-                <div style="margin-top: 30px;">
-                    <h3>Agregar Nuevo Material</h3>
-                    <form action="/agregar-material" method="POST">
-                        <div style="margin-bottom: 15px;">
-                            <label>Nombre del Material</label>
-                            <input type="text" name="nombre_material" required>
-                        </div>
-                        <div style="margin-bottom: 20px;">
-                            <label>Precio por m³</label>
-                            <input type="number" step="0.01" name="precio_m3" required>
-                        </div>
-                        <button type="submit" class="btn-submit-panel">Agregar Material</button>
-                    </form>
-                </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<script>
-    function cambiarSeccion(idSeccion, elementoActivo) {
-        // 1. Ocultar absolutamente todas las secciones del panel
-        document.querySelectorAll('.section-panel').forEach(sec => {
-            sec.style.display = 'none';
-        });
         
-        // 2. Mostrar únicamente la sección a la que se le hizo clic
-        const seccionObjetivo = document.getElementById(idSeccion);
-        if (seccionObjetivo) {
-            seccionObjetivo.style.display = 'block';
-        }
-        
-        // 3. Quitar la clase "active" de todos los botones de la barra lateral
-        document.querySelectorAll('.menu-item').forEach(item => {
-            item.classList.remove('active');
-        });
-        
-        // 4. Agregar la clase "active" solo al botón presionado
-        elementoActivo.classList.add('active');
-        
-        // 5. Cambiar el título principal de la cabecera dinámicamente
-        const titulos = {
-            'sec-dash': 'Panel de Control Principal',
-            'sec-pedidos': 'Control e Historial de Pedidos',
-            'sec-maquinaria': 'Gestión de Maquinaria y Equipos',
-            'sec-personal': 'Administración de Personal de Sistema',
-            'sec-materiales': 'Gestión de Catálogo de Materiales'
-        };
-        
-        const tituloPanel = document.getElementById('titulo-panel');
-        if (tituloPanel && titulos[idSeccion]) {
-            tituloPanel.innerText = titulos[idSeccion];
-        }
-    }
 
-    // Temporizador para que las alertas desaparezcan solas
-    window.addEventListener('DOMContentLoaded', () => {
-        const flashContainer = document.getElementById('flash-container');
-        if (flashContainer) {
-            setTimeout(() => {
-                flashContainer.style.opacity = '0';
-                setTimeout(() => { flashContainer.remove(); }, 500);
-            }, 4000);
-        }
-    });
-    </script>
+
+
+               
+              
+
+
+
+        <script>
+            function cambiarSeccion(idSeccion, elementoActivo) {
+                // 1. Ocultar absolutamente todas las secciones del panel
+                document.querySelectorAll('.section-panel').forEach(sec => {
+                    sec.style.display = 'none';
+                });
+                
+                // 2. Mostrar únicamente la sección a la que se le hizo clic
+                const seccionObjetivo = document.getElementById(idSeccion);
+                if (seccionObjetivo) {
+                    seccionObjetivo.style.display = 'block';
+                }
+                
+                // 3. Quitar la clase "active" de todos los botones de la barra lateral
+                document.querySelectorAll('.menu-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+                
+                // 4. Agregar la clase "active" solo al botón presionado
+                elementoActivo.classList.add('active');
+                
+                // 5. Cambiar el título principal de la cabecera dinámicamente
+                const titulos = {
+                    'sec-dash': 'Panel de Control Principal',
+                    'sec-pedidos': 'Control e Historial de Pedidos',
+                    'sec-maquinaria': 'Gestión de Maquinaria y Equipos',
+                    'sec-personal': 'Administración de Personal de Sistema',
+                    'sec-materiales': 'Gestión de Catálogo de Materiales'
+                };
+                
+                const tituloPanel = document.getElementById('titulo-panel');
+                if (tituloPanel && titulos[idSeccion]) {
+                    tituloPanel.innerText = titulos[idSeccion];
+                }
+            }
+
+            // Temporizador para que las alertas desaparezcan solas
+            window.addEventListener('DOMContentLoaded', () => {
+                const flashContainer = document.getElementById('flash-container');
+                if (flashContainer) {
+                    setTimeout(() => {
+                        flashContainer.style.opacity = '0';
+                        setTimeout(() => { flashContainer.remove(); }, 500);
+                    }, 4000);
+                }
+            });
+            </script>
+
 </body>
 </html>

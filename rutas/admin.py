@@ -111,11 +111,8 @@ def dashboard():
 
 
         # NUEVO: Traer Catálogo de Materiales para el Administrador
-        cursor.execute("""
-            SELECT id, nombre, descripcion 
-            FROM materiales 
-            ORDER BY id DESC
-        """)
+        cursor.execute("SELECT id, nombre_material, precio_m3 FROM materiales")
+
         lista_materiales = cursor.fetchall()
 
 
@@ -149,6 +146,7 @@ def dashboard():
             materiales=lista_materiales,
             zonas=lista_zonas,
             operadores=lista_operadores
+            
         )
         
     except Exception as e:
@@ -290,37 +288,69 @@ def asignar_operador():
     return redirect(url_for('admin.dashboard'))
 
 
-
 # NUEVA RUTA: GUARDAR NUEVO MATERIAL EN EL CATÁLOGO
 @admin.route('/materiales/guardar', methods=['POST'])
 @login_requerido
 def guardar_material():
     from app import mysql
-    
-    nombre = request.form.get('nombre')
-    descripcion = request.form.get('descripcion')
-    
+
+    nombre = request.form.get('nombre_material')
+    precio = request.form.get('precio_m3')
+
     cursor = mysql.connection.cursor()
-    
+
     try:
+        # CORRECCIÓN: Se cambió 'nombre_materiales' por 'materiales'
         cursor.execute(
-            "INSERT INTO materiales (nombre, descripcion) VALUES (%s, %s)",
-            (nombre, descripcion)
+            """
+            INSERT INTO materiales (nombre_material, precio_m3)
+            VALUES (%s, %s)
+            """,
+            (nombre, precio)
         )
-        
+
         mysql.connection.commit()
         flash("Material guardado en el catálogo.", "success")
-        
+
     except Exception as e:
         mysql.connection.rollback()
         flash(f"Error al guardar material: {str(e)}", "error")
-        
+
     finally:
         cursor.close()
-        
+
     return redirect(url_for('admin.dashboard'))
 
+# NUEVA RUTA: ELIMINAR UN MATERIAL DEL CATÁLOGO
+@admin.route('/eliminar-material', methods=['POST'])
+@login_requerido
+def eliminar_material():
+    from app import mysql
 
+    # Se obtiene el ID enviado desde el campo oculto (input hidden) del HTML
+    id_material = request.form.get('id_material')
+
+    cursor = mysql.connection.cursor()
+
+    try:
+        # Se ejecuta la sentencia SQL apuntando a la tabla correcta 'materiales'
+        cursor.execute(
+            "DELETE FROM materiales WHERE id = %s", 
+            (id_material,)
+        )
+
+        mysql.connection.commit()
+        flash("Material eliminado correctamente del catálogo.", "success")
+
+    except Exception as e:
+        mysql.connection.rollback()
+        flash(f"Error al eliminar el material: {str(e)}", "error")
+
+    finally:
+        cursor.close()
+
+    # Redirige de vuelta al dashboard para actualizar la tabla visualmente
+    return redirect(url_for('admin.dashboard'))
 
 # NUEVA RUTA: GUARDAR NUEVA ZONA Y TARIFA
 @admin.route('/zonas/guardar', methods=['POST'])
