@@ -173,7 +173,7 @@ def logout():
     return redirect(url_for('admin.enlogin'))
 
 
-
+#RUTA PARA CREAR PEDIDO DESDE EL DASHBOARD DEL CLIENTE
 @admin.route('/crear-pedido', methods=['POST'])
 def crear_pedido():
     if not session.get('logeado'):
@@ -357,30 +357,67 @@ def eliminar_material():
 @login_requerido
 def guardar_zona():
     from app import mysql
+
+    # Primero obtener los datos
+    nombre = request.form.get("nombre_zona")
+    precio = request.form.get("tarifa")
+
+
+    print(request.form)
+    print("Zona:", nombre)
+    print("Tarifa:", precio)
+
+    # Luego validar
+    if not nombre or not precio:
+        flash("Todos los campos son obligatorios.", "error")
+        return redirect(url_for('admin.dashboard'))
+
+    cursor = mysql.connection.cursor()
+
+    try:
+        cursor.execute(
+            "INSERT INTO zonas_tarifas (zona, tarifa) VALUES (%s, %s)",
+            (nombre, float(precio))
+        )
+
+        mysql.connection.commit()
+        flash("Zona y tarifa añadidas con éxito.", "success")
+
+    except Exception as e:
+        mysql.connection.rollback()
+        flash(f"Error al registrar zona: {str(e)}", "error")
+
+    finally:
+        cursor.close()
+
+    return redirect(url_for('admin.dashboard'))
+#eliminar zona
+@admin.route('/eliminar-zona', methods=['POST'])
+@login_requerido
+def eliminar_zona():
+    from app import mysql
     
-    zona = request.form.get('zona')
-    tarifa = request.form.get('tarifa')
+    id_zona = request.form.get('id_zona')
     
     cursor = mysql.connection.cursor()
     
     try:
         cursor.execute(
-            "INSERT INTO zonas_tarifas (zona, tarifa) VALUES (%s, %s)",
-            (zona, float(tarifa))
+            "DELETE FROM zonas_tarifas WHERE id = %s",
+            (id_zona,)
         )
         
         mysql.connection.commit()
-        flash("Zona y tarifa añadidas con éxito.", "success")
+        flash("Zona eliminada correctamente.", "success")
         
     except Exception as e:
         mysql.connection.rollback()
-        flash(f"Error al registrar zona: {str(e)}", "error")
+        flash(f"Error al eliminar la zona: {str(e)}", "error")
         
     finally:
         cursor.close()
         
     return redirect(url_for('admin.dashboard'))
-
 
 
 # ELIMINAR USUARIOS
@@ -439,6 +476,41 @@ def crear_usuario():
     except Exception as e:
         mysql.connection.rollback()
         flash(f"Error al registrar usuario: {str(e)}", "error")
+        
+    finally:
+        cursor.close()
+        
+    return redirect(url_for('admin.dashboard'))
+
+#RUTA GUARDAR NUEVA MAQUINARIA/VOLQUETA
+@admin.route('/maquinaria/guardar', methods=['POST'])
+@login_requerido    
+def guardar_maquinaria():
+    from app import mysql
+    
+    codigo_maquina = request.form.get('codigo_maquina')
+    tipo = request.form.get('tipo')
+    estado = request.form.get('estado')
+    horas_totales = int(request.form.get('horas_totales', 0))
+    placa = request.form.get('placa')
+    capacidad = float(request.form.get('capacidad', 0))
+    
+    cursor = mysql.connection.cursor()
+    
+    try:
+        cursor.execute("""
+            INSERT INTO maquinaria 
+            (codigo_maquina, tipo, estado, horas_totales, placa, capacidad) 
+            VALUES (%s, %s, %s, %s, %s, %s)
+        """, 
+        (codigo_maquina, tipo, estado, horas_totales, placa, capacidad))
+        
+        mysql.connection.commit()
+        flash("Maquinaria/Volqueta registrada correctamente.", "success")
+        
+    except Exception as e:
+        mysql.connection.rollback()
+        flash(f"Error al registrar maquinaria: {str(e)}", "error")
         
     finally:
         cursor.close()
