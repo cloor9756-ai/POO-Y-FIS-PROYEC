@@ -219,7 +219,33 @@ def crear_pedido():
         cursor.close()
         
     return redirect(url_for('admin.dashboard_cliente'))
-
+#RUTA ELIMINAR PEDIDO DESDE EL DASHBOARD DEL ADMINISTRADOR
+@admin.route('/eliminar-pedido', methods=['POST'])
+@login_requerido
+def eliminar_pedido():
+    from app import mysql
+    
+    id_pedido = request.form.get('id_pedido')
+    
+    cursor = mysql.connection.cursor()
+    
+    try:
+        cursor.execute(
+            "DELETE FROM pedidos WHERE id = %s",
+            (id_pedido,)
+        )
+        
+        mysql.connection.commit()
+        flash("Pedido eliminado correctamente del sistema.", "success")
+        
+    except Exception as e:
+        mysql.connection.rollback()
+        flash(f"Error al eliminar el pedido: {str(e)}", "error")
+        
+    finally:
+        cursor.close()
+        
+    return redirect(url_for('admin.dashboard'))
 
 # NUEVA RUTA: ACTUALIZAR ESTADO Y HORAS DE MAQUINARIA NO FUNCIONAL TOAVIA
 @admin.route('/actualizar-maquinaria', methods=['POST'])
@@ -516,3 +542,49 @@ def guardar_maquinaria():
         cursor.close()
         
     return redirect(url_for('admin.dashboard'))
+#RUTA GENERAR REPORTE ADMIN
+@admin.route('/generar-reporte', methods=['GET'])
+@login_requerido
+def generar_reporte():
+    from app import mysql
+    import csv
+    from io import StringIO
+    from flask import Response
+
+    cursor = mysql.connection.cursor()
+    
+    try:
+        cursor.execute("""
+            SELECT id, costo_material, costo_transporte, costo_maquinaria, total 
+            FROM pedidos 
+            ORDER BY id DESC
+        """)
+        pedidos = cursor.fetchall()
+        
+        # Crear un archivo CSV en memoria
+        si = StringIO()
+        cw = csv.writer(si)
+        
+        # Escribir encabezados
+        cw.writerow(['ID', 'Costo Material', 'Costo Transporte', 'Costo Maquinaria', 'Total'])
+        
+        # Escribir datos de pedidos
+        for ped in pedidos:
+            cw.writerow(ped)
+        
+        output = si.getvalue()
+        si.close()
+        
+        # Preparar la respuesta para descargar el archivo CSV
+        return Response(
+            output,
+            mimetype="text/csv",
+            headers={"Content-Disposition": "attachment;filename=reporte_pedidos.csv"}
+        )
+        
+    except Exception as e:
+        flash(f"Error al generar el reporte: {str(e)}", "error")
+        return redirect(url_for('admin.dashboard'))
+        
+    finally:
+        cursor.close()
