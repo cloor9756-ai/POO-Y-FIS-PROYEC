@@ -223,7 +223,7 @@
                 {% endif %}
             {% endwith %}
 
-        <!-- ================= SECCIÓN 1: DASHBOARD (MÉTRICAS) ================= -->
+         <!-- ================= SECCIÓN 1: DASHBOARD (MÉTRICAS) ================= -->
             <div id="sec-dash" class="section-panel">
                 <div class="cards-grid">
                     <div class="card">
@@ -299,7 +299,7 @@
                 </div>
             </div>
         
-            <!-- ================= SECCIÓN 3: MAQUINARIA Y VOLQUETAS ================= -->
+            <!-- ================= SECCIÓN 3: GESTION DE MAQUINARIA Y VOLQUETAS ================= -->
             <div id="sec-maquinaria" class="section-panel" style="display: none;">
                 <div class="table-container" style="margin-bottom: 40px;">
                     <h2><i class="fa-solid fa-screwdriver-wrench"></i> Control de Maquinaria y Volquetas</h2>
@@ -325,10 +325,10 @@
                                     <td>{{ maq[6] if maq[6] else 'N/A' }}</td>
                                     <td>{{ maq[3] }}</td>
                                    
-                                    <!-- boton de eliminar operador -->
+                                    <!-- boton de maquinaria operador -->
                                     <td>
                                         {% if maq[7] %}
-                                        <form action="/eliminar-operador" method="POST" style="display:inline;">
+                                        <form action="/eliminar-maquinaria" method="POST" style="display:inline;">
                                             <input type="hidden" name="id_maquina" value="{{ maq[0] }}">
                                             <button type="submit"
                                                     class="btn-delete"
@@ -355,23 +355,33 @@
                                                 {% endfor %}
                                             </select>
                                         </form>
-                                    </td>
-                                     <!-- boton añadir maquinaria-->
-                                      <td> 
-                                        <form action="/agregar-maquinaria" method="POST" style="display:inline;">
-                                            <input type="hidden" name="id_maquina" value="{{ maq[0] }}">
-                                            <button type="submit"
-                                                    class="btn-submit-panel"
-                                                    style="background:none;border:none;color:#4dffa6;cursor:pointer;">
-                                                <i class="fa-solid fa-plus"></i> Añadir
-                                            </button>
-                                        </form>
-                                    </td>
-                                     
+                                    </td>    
                                 </tr>
                             {% endfor %}
                         </tbody> 
                     </table> 
+                                 <tr>
+                                    <!--FORMULARIO Agregrar maquinaria -->
+                                    <div style="margin: 20px;">
+                                        <form action="/maquinaria/guardar" method="POST" style="display:flex; gap:10px; flex-wrap:wrap;">
+                                            <input type="text" name="codigo_maquina" placeholder="Código de Maquinaria" required>
+                                            <select name="tipo" required>
+                                                <option value="">Tipo de Maquinaria</option>
+                                                <option value="Retroexcavadora">Retroexcavadora</option>
+                                                <option value="Volqueta">Volqueta</option>
+                                            </select>
+                                            <input type="text" name="placa" placeholder="Placa (opcional)">
+                                            <input type="number" step="0.01" name="capacidad" placeholder="Capacidad m³ (opcional)">
+                                            <select name="estado" required>
+                                                <option value="">Estado</option>
+                                                <option value="Disponible">Disponible</option>
+                                                <option value="En Mantenimiento">En Mantenimiento</option>
+                                                <option value="En Uso">En Uso</option>
+                                            </select>
+                                            <button type="submit" class="btn-submit-panel">Agregar Maquinaria</button>
+                                        </form>
+                                    </div>
+                                </tr>
                 </div>
              </div> 
         
@@ -434,160 +444,112 @@
                             <button type="submit" class="btn-submit-panel" style="width: 100%;"> Guardar Material </button>
                         </form>
                     </div>
-                </div>
-                </div>
-                <!-- ================= SECCIÓN 5: GESTIONAR ZONA Y TARIFAS ================= -->
-                <div id="sec-zona" class="section-panel" style="display: none;">
-                    <div class="table-container">
-                        <h2><i class="fa-solid fa-map-location-dot"></i> Gestión de Zonas y Tarifas</h2>
-                        <table class="data-table">
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Nombre de la Zona</th>
-                                    <th>Tarifa por m³</th>
-                                    <th>Acción</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for zona in zonas %}
-                                <tr>
-                                    <td>{{ zona[0] }}</td>
-                                    <td>{{ zona[1] }}</td>
-                                    <td>$ {{ "{:,.2f}".format(zona[2]) }}</td>
-                                    
-                                    <td>
-                                        <!-- BOTON eliminar ZONA no funcional todavia -->
-                                        <form action="/eliminar-zona" method="POST" style="display:inline;">
-                                            <input type="hidden" name="id_zona" value="{{ zona[0] }}">
-                                            <button type="submit" class="btn-delete" style="background: none; border: none; color: #ff4d4d; cursor: pointer;">
-                                                <i class="fa-solid fa-trash"></i> Borrar
-                                            </button>
-                                        </form>
-                                    </td>
-                                </tr>
-                                {% else %}
-                                <tr>
-                                    <td colspan="4" style="text-align: center; color: #888; padding: 15px;">No hay zonas registradas en el sistema.</td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
+                    </div>
+                    </div>
+                    <!-- ================= SECCIÓN 5: GESTIONAR ZONA Y TARIFAS ================= -->
+                    <div id="sec-zona" class="section-panel" style="display: none;">
+                        <div class="table-container">
+                            <h2><i class="fa-solid fa-map-location-dot"></i> Gestión de Zonas y Tarifas</h2>
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Nombre de la Zona</th>
+                                        <th>Tarifa por m³</th>
+                                        <th>Acción</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for zona in zonas %}
+                                    <tr>
+                                        <td>{{ zona[0] }}</td>
+                                        <td>{{ zona[1] }}</td>
+                                        <td>$ {{ "{:,.2f}".format(zona[2]) }}</td>
+                                        
+                                        <td>
+                                            <!-- BOTON eliminar ZONA no funcional todavia -->
+                                            <form action="/eliminar-zona" method="POST" style="display:inline;">
+                                                <input type="hidden" name="id_zona" value="{{ zona[0] }}">
+                                                <button type="submit" class="btn-delete" style="background: none; border: none; color: #ff4d4d; cursor: pointer;">
+                                                    <i class="fa-solid fa-trash"></i> Borrar
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                    {% else %}
+                                    <tr>
+                                        <td colspan="4" style="text-align: center; color: #888; padding: 15px;">No hay zonas registradas en el sistema.</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
 
-                        <!-- Formulario para agregar nueva zona -->
-                        <div style="margin-top: 30px;">
-                            <h3>Agregar Nueva Zona</h3>
-                            <form action="/zonas/guardar" method="POST">
-                                <div style="margin-bottom: 15px;">
-                                    <label>Nombre de la Zona</label>
-                                    <input type="text" name="nombre_zona" required>
-                                </div>
-                                <div style="margin-bottom: 15px;">
-                                    <label>Precio por transporte</label>
-                                    <input type="number" step="0.01" name="tarifa" required>
-                                </div>
-                                <button type="submit" class="btn-submit-panel" style="width: 100%;"> Guardar Zona </button>
-                            </form>
+                            <!-- Formulario para agregar nueva zona -->
+                            <div style="margin-top: 30px;">
+                                <h3>Agregar Nueva Zona</h3>
+                                <form action="/zonas/guardar" method="POST">
+                                    <div style="margin-bottom: 15px;">
+                                        <label>Nombre de la Zona</label>
+                                        <input type="text" name="nombre_zona" required>
+                                    </div>
+                                    <div style="margin-bottom: 15px;">
+                                        <label>Precio por transporte</label>
+                                        <input type="number" step="0.01" name="tarifa" required>
+                                    </div>
+                                    <button type="submit" class="btn-submit-panel" style="width: 100%;"> Guardar Zona </button>
+                                </form>
+                            </div>
                         </div>
                     </div>
-                </div>
-             </div>   
+               
                     <!-- ================= SECCIÓN 6: REPORTES ================= -->
                         <div id="sec-reporte" class="section-panel" style="display:none;">
-
                             <div class="table-container">
-
                                 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:25px;flex-wrap:wrap;">
                                     <div>
-                                        <h2 style="margin-bottom:5px;">
-                                            <i class="fa-solid fa-file-invoice-dollar" style="color:#4ea8de;"></i>
-                                            Reporte de Ingresos
-                                        </h2>
-                                        <p style="color:#9ca3af;font-size:14px;">
-                                            Seleccione el rango de fechas para generar el reporte.
-                                        </p>
-                                    </div>
-
+                                        <h2 style="margin-bottom:5px;"><i class="fa-solid fa-map-location-dot" style="color:#4ea8de;"></i> Reporte de Ingresos</h2>
+                                         <p style="color:#9ca3af;font-size:14px;"> Seleccione el rango de fechas para generar el reporte.</p></div>
                                     <div style="background:#1f2937;padding:12px 18px;border-radius:12px;">
-                                        <i class="fa-solid fa-chart-column" style="color:#22c55e;font-size:22px;"></i>
-                                    </div>
+                                         <i class="fa-solid fa-chart-column" style="color:#22c55e;font-size:22px;"></i>
+                                    </div>        
                                 </div>
+                                <div style="margin-top:20px;">
+                                   <form action="{{ url_for('admin.generar_reporte') }}" method="POST">
+                                        <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:20px; margin-bottom:25px;">
+                                            <!-- Fecha Inicio -->
+                                            <div>
+                                                <label style="display:block;margin-bottom:8px;font-weight:600;">
+                                                    <i class="fa-regular fa-calendar"></i> Fecha de Inicio
+                                                </label>
 
-                                <form action="{{ url_for('admin.generar_reporte') }}" method="POST">
+                                                <input
+                                                    type="date" name="fecha_inicio" required style=" width:100%; padding:12px; border-radius:10px; border:1px solid #374151; background:#111827; color:white;">
+                                            </div>
+                                            <!-- Fecha Fin -->
+                                            <div>
+                                                <label style="display:block;margin-bottom:8px;font-weight:600;">
+                                                    <i class="fa-regular fa-calendar-check"></i>Fecha de Fin
+                                                </label>
 
-                                    <div style="
-                                        display:grid;
-                                        grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
-                                        gap:20px;
-                                        margin-bottom:25px;">
+                                                <input
+                                                    type="date" name="fecha_fin" required style=" width:100%; padding:12px; border-radius:10px; border:1px solid #374151;  background:#111827; color:white;">
+                                            </div>
 
-                                        <!-- Fecha Inicio -->
-                                        <div>
-                                            <label style="display:block;margin-bottom:8px;font-weight:600;">
-                                                <i class="fa-regular fa-calendar"></i>
-                                                Fecha de Inicio
-                                            </label>
-
-                                            <input
-                                                type="date"
-                                                name="fecha_inicio"
-                                                required
-                                                style="
-                                                    width:100%;
-                                                    padding:12px;
-                                                    border-radius:10px;
-                                                    border:1px solid #374151;
-                                                    background:#111827;
-                                                    color:white;">
                                         </div>
 
-                                        <!-- Fecha Fin -->
-                                        <div>
-                                            <label style="display:block;margin-bottom:8px;font-weight:600;">
-                                                <i class="fa-regular fa-calendar-check"></i>
-                                                Fecha de Fin
-                                            </label>
+                                        <button type="submit" class="btn-submit-panel" style="width:100%; padding:14px; font-size:16px; font-weight:bold; border-radius:12px;">
+                                            <i class="fa-solid fa-file-arrow-down"></i>
+                                            Generar Reporte 
+                                        </button>
 
-                                            <input
-                                                type="date"
-                                                name="fecha_fin"
-                                                required
-                                                style="
-                                                    width:100%;
-                                                    padding:12px;
-                                                    border-radius:10px;
-                                                    border:1px solid #374151;
-                                                    background:#111827;
-                                                    color:white;">
-                                        </div>
-
-                                    </div>
-
-                                    <button
-                                        type="submit"
-                                        class="btn-submit-panel"
-                                        style="
-                                            width:100%;
-                                            padding:14px;
-                                            font-size:16px;
-                                            font-weight:bold;
-                                            border-radius:12px;">
-
-                                        <i class="fa-solid fa-file-arrow-down"></i>
-                                        Generar Reporte PDF
-
-                                    </button>
-
-                                </form>
-
+                                    </form> 
                             </div>
-
                         </div>
-                    <!-- ================= SECCIÓN 7: CONTROL DE PERSONAL ================= -->
+                        </div>
+                        
+                   <!-- ================= SECCIÓN 7: CONTROL DE PERSONAL ================= -->
                     <div id="sec-personal" class="section-panel" style="display: none;">
                         <div style="display: flex; gap: 20px; flex-wrap: wrap;">
-                            
-                            <!-- Tabla de Usuarios -->
                             <div class="table-container" style="flex: 1.5; min-width: 400px;">
                                 <h2>Usuarios con Acceso al Sistema</h2>
                                 <table class="data-table">
@@ -644,8 +606,7 @@
                                 </form>
                             </div>
                         </div>
-                    </div>
-                            
+                           
             <script>
                 function cambiarSeccion(idSeccion, elementoActivo) {
                     // 1. Ocultar absolutamente todas las secciones del panel
@@ -673,7 +634,10 @@
                         'sec-pedidos': 'Control e Historial de Pedidos',
                         'sec-maquinaria': 'Gestión de Maquinaria y Equipos',
                         'sec-personal': 'Administración de Personal de Sistema',
-                        'sec-materiales': 'Gestión de Catálogo de Materiales'
+                        'sec-materiales': 'Gestión de Catálogo de Materiales',
+                        'sec-zona': 'Gestión de Zonas y Tarifas',
+                        'sec-reporte': 'Generación de Reportes por Periodo'
+                        
                     };
                     
                     const tituloPanel = document.getElementById('titulo-panel');

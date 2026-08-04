@@ -3,7 +3,7 @@ from functools import wraps
 
 admin = Blueprint('admin', __name__)
 
-
+# Decorador para requerir login
 def login_requerido(f):
     @wraps(f)
     def funcion_decorada(*args, **kwargs):
@@ -13,7 +13,7 @@ def login_requerido(f):
         return f(*args, **kwargs)
     return funcion_decorada
 
-
+# RUTA DE LOGIN
 @admin.route('/login', methods=['GET', 'POST'])
 def enlogin():
     if request.method == 'POST':
@@ -53,7 +53,7 @@ def enlogin():
             
     return render_template('index.html')
 
-
+# NUEVA RUTA: DASHBOARD DEL CLIENTE
 @admin.route('/dashboard-cliente')
 def dashboard_cliente():
     if not session.get('logeado') or session.get('rol') != 'Cliente':
@@ -76,7 +76,7 @@ def dashboard_cliente():
                            materiales=lista_materiales, 
                            zonas=lista_zonas)
 
-
+# NUEVA RUTA: DASHBOARD DEL ADMINISTRADOR
 @admin.route('/dashboard')
 @login_requerido
 def dashboard():
@@ -166,7 +166,7 @@ def dashboard():
             cursor.close()
 
 
-
+# RUTA DE LOGOUT O CIERRE DE SESIÓN
 @admin.route('/logout')
 def logout():
     session.clear()
@@ -542,6 +542,34 @@ def guardar_maquinaria():
         cursor.close()
         
     return redirect(url_for('admin.dashboard'))
+#RUTA ELIMINAR MAQUINARIA/VOLQUETA
+@admin.route('/eliminar-maquinaria', methods=['POST'])
+@login_requerido
+def eliminar_maquinaria():
+    from app import mysql
+    
+    id_maquina = request.form.get('id_maquina')
+    
+    cursor = mysql.connection.cursor()
+    
+    try:
+        cursor.execute(
+            "DELETE FROM maquinaria WHERE id = %s",
+            (id_maquina,)
+        )
+        
+        mysql.connection.commit()
+        flash("Maquinaria/Volqueta eliminada correctamente.", "success")
+        
+    except Exception as e:
+        mysql.connection.rollback()
+        flash(f"Error al eliminar la maquinaria: {str(e)}", "error")
+        
+    finally:
+        cursor.close()
+        
+    return redirect(url_for('admin.dashboard'))
+
 #RUTA GENERAR REPORTE ADMIN
 @admin.route('/generar-reporte', methods=['GET'])
 @login_requerido
