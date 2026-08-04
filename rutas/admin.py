@@ -616,3 +616,110 @@ def generar_reporte():
         
     finally:
         cursor.close()
+
+    #GESTION DE HOARRIOS
+    @admin.route('/gestionar-horarios', methods=['POST'])
+    @login_requerido
+    def gestionar_horarios():
+        from app import mysql
+        
+        id_maquina = request.form.get('id_maquina')
+        nuevo_horario = request.form.get('nuevo_horario')
+        
+        cursor = mysql.connection.cursor()
+        
+        try:
+            cursor.execute("""
+                UPDATE maquinaria 
+                SET horario = %s 
+                WHERE id = %s
+            """, 
+            (nuevo_horario, id_maquina))
+            
+            mysql.connection.commit()
+            flash("Horario actualizado correctamente.", "success")
+            
+        except Exception as e:
+            mysql.connection.rollback()
+            flash(f"Error al actualizar el horario: {str(e)}", "error")
+            
+        finally:
+            cursor.close()
+            
+        return redirect(url_for('admin.dashboard'))
+    
+ #ELIMINAR HORARIOS DE CHOFERES Y OPERARIOS
+@admin.route('/eliminar-horario/<int:id_horario>', methods=['POST'])
+@login_requerido
+def eliminar_horario(id_horario):
+        from app import mysql
+        
+        cursor = mysql.connection.cursor()
+        
+        try:
+            cursor.execute(
+                "DELETE FROM maquinaria WHERE id = %s",
+                (id_horario,)
+            )
+            
+            mysql.connection.commit()
+            flash("Horario eliminado correctamente.", "success")
+            
+        except Exception as e:
+            mysql.connection.rollback()
+            flash(f"Error al eliminar el horario: {str(e)}", "error")
+            
+        finally:
+            cursor.close()
+            
+        return redirect(url_for('admin.consultar_turnos'))
+    
+#CONSULTA DE TURNOS DE CHOFERES Y OPERARIOS
+@admin.route('/consultar-turnos', methods=['GET'])
+@login_requerido
+def consultar_turnos():
+        from app import mysql
+        
+        cursor = mysql.connection.cursor()
+        
+        try:
+            cursor.execute("""
+                SELECT m.codigo_maquina, m.tipo, m.horario, u.username 
+                FROM maquinaria m
+                LEFT JOIN usuarios u ON m.operador_id = u.id
+            """)
+            turnos = cursor.fetchall()
+            
+            return render_template('admin/turnos.html', turnos=turnos)
+            
+        except Exception as e:
+            flash(f"Error al consultar los turnos: {str(e)}", "error")
+            return redirect(url_for('admin.dashboard'))
+            
+        finally:
+            cursor.close()
+#ELIMINAR TURNO
+@admin.route('/eliminar-turno/<int:id_turno>', methods=['POST'])
+@login_requerido
+def eliminar_turno(id_turno):
+    from app import mysql
+    
+    cursor = mysql.connection.cursor()
+    
+    try:
+        cursor.execute(
+            "DELETE FROM maquinaria WHERE id = %s",
+            (id_turno,)
+        )
+        
+        mysql.connection.commit()
+        flash("Turno eliminado correctamente.", "success")
+        
+    except Exception as e:
+        mysql.connection.rollback()
+        flash(f"Error al eliminar el turno: {str(e)}", "error")
+        
+    finally:
+        cursor.close()
+        
+    return redirect(url_for('admin.consultar_turnos'))

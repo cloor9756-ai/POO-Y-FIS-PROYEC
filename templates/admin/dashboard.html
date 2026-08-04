@@ -187,11 +187,17 @@
     <button class="menu-item" onclick="cambiarSeccion('sec-reporte', this)">
         <i class="fa-solid fa-file-invoice-dollar"></i> Reporte por Periodo
     </button>
+    <button class="menu-item" onclick="cambiarSeccion('sec-horarios', this)">
+        <i class="fa-solid fa-clock"></i> Gestión de Horarios
+    </button>
+    <button class="menu-item" onclick="cambiarSeccion('sec-turnos', this)">
+        <i class="fa-solid fa-calendar-days"></i> Consulta de Turnos
+    </button>
 
     <div style="position: absolute; bottom: 20px; left: 15px; width: calc(100% - 30px);">
     <a href="{{ url_for('admin.logout') }}" style="color: #ff4d4d; text-decoration: none; display: flex; align-items: center; gap: 8px; font-weight: bold; font-family: sans-serif;">
         <svg xmlns="http://w3.org" width="18" height="18" fill="currentColor" viewBox="0 0 16 16">
-            <path fill-rule="evenodd" d="M6 12.5a.5.5 0 0 0 .5.5h8a.5.5 0 0 0 .5-.5v-9a.5.5 0 0 0-.5-.5h-8a.5.5 0 0 0-.5.5v2a.5.5 0 0 1-1 0v-2A1.5 1.5 0 0 1 6.5 2h8A1.5 1.5 0 0 1 16 3.5v9a1.5 1.5 0 0 1-1.5 1.5h-8A1.5 1.5 0 0 1 5 12.5v-2a.5.5 0 0 1 1 0v2z"/>
+            <path fill-rule="evenodd" d="M6 12.5a.5.5 0 0 0 .5.5h8a.5.5 0 0 0 .5-.5v-9a.5.5 0 0 0-.5-.5h-8a.5.5 0 0 0-.5.5v2a.5.5 0 0 1-1 0v-2A1.5 1.5 0 0 1 6.5 2h8A1.5 1.5 0 0 1 16 3.5v9a1.5 1.5 0 0 1-1.5 1.5h-8A1.5 1.5 0 0 1 5 12.5v-2a.5.5 0 0 1  1 0v2z"/>
             <path fill-rule="evenodd" d="M.146 8.354a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L1.707 7.5H10.5a.5.5 0 0 1 0 1H1.707l2.147 2.146a.5.5 0 0 1-.708.708z"/>
         </svg>
         <span>Cerrar Sesión</span>
@@ -606,7 +612,81 @@
                                 </form>
                             </div>
                         </div>
-                           
+                    </div>
+                                 <!-- ================= SECCIÓN 8: CONSULAR TURNOS DE CHOFERES Y OPERARIOS================= -->
+                                <div id="sec-turnos" class="section-panel" style="display: none;">
+                                    <div class="table-container">
+                                        <h2>Turnos de Choferes y Operarios</h2>
+                                        <table class="data-table">
+                                                <thead>
+                                                    <tr>
+                                                        <th>ID</th>
+                                                        <th>Nombre del Usuario</th>
+                                                        <th>Rol</th>
+                                                        <th>Turno Asignado</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {% for turno in turnos %}
+                                                    <tr>
+                                                        <td>{{ turno[0] }}</td>
+                                                        <td>{{ turno[1] }}</td>
+                                                        <td>{{ turno[2] }}</td>
+                                                        <td>{{ turno[3] }}</td>
+                                                        <td>
+                                                            <form action="{{ url_for('admin.eliminar_turno', id_turno=turno[0]) }}" method="POST" style="display:inline;">
+                                                                <button type="submit" class="btn-delete" style="background: none; border: none; color: #ff4d4d; cursor: pointer;">
+                                                                    <i class="fa-solid fa-trash"></i> Borrar
+                                                                </button>
+                                                            </form>
+                                                    </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                        </table>
+                                        <tr>
+                                        <!--Formulario de turnos de chefer y operadores-->
+                                            <div class="table-conteiner" style="flex: 1; min-width: none;">
+                                                <h2></h2>
+                                                
+                                            </div>
+
+                                        </tr>
+                                    </div>
+                                </div>
+                                <!-- ================= SECCIÓN 9: GESTION DE TURNOS DE CHOFERES Y OPERARIOS================= -->
+                                <div id="sec-horarios" class="section-panel" style="display: none;">
+                                <div class="table-container">
+                                    <h2>Gestión de Horarios de Choferes y Operarios</h2>
+                                    <table class="data-table">
+                                        <thead>
+                                            <tr>
+                                                <th>ID</th>
+                                                <th>Nombre del Usuario</th>
+                                                <th>Rol</th>
+                                                <th>Turno Asignado</th>
+                                                <th>Acción</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for horario in horarios %}
+                                            <tr>
+                                                <td>{{ horario[0] }}</td>
+                                                <td>{{ horario[1] }}</td>
+                                                <td>{{ horario[2] }}</td>
+                                                <td>{{ horario[3] }}</td>
+                                                <td>
+                                                    <form action="{{ url_for('admin.eliminar_horario', id_horario=horario[0]) }}" method="POST" style="display:inline;">
+                                                        <button type="submit" class="btn-delete" style="background: none; border: none; color: #ff4d4d; cursor: pointer;">
+                                                            <i class="fa-solid fa-trash"></i> Borrar
+                                                        </button>
+                                                    </form>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                </div>
             <script>
                 function cambiarSeccion(idSeccion, elementoActivo) {
                     // 1. Ocultar absolutamente todas las secciones del panel
@@ -636,8 +716,9 @@
                         'sec-personal': 'Administración de Personal de Sistema',
                         'sec-materiales': 'Gestión de Catálogo de Materiales',
                         'sec-zona': 'Gestión de Zonas y Tarifas',
-                        'sec-reporte': 'Generación de Reportes por Periodo'
-                        
+                        'sec-reporte': 'Generación de Reportes por Periodo',
+                        'sec-turnos': 'Consulta de Turnos de Choferes y Operarios',
+                        'sec-horarios': 'Gestión de Horarios de Choferes y Operarios'
                     };
                     
                     const tituloPanel = document.getElementById('titulo-panel');
