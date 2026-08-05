@@ -219,6 +219,7 @@ def crear_pedido():
         cursor.close()
         
     return redirect(url_for('admin.dashboard_cliente'))
+
 #RUTA ELIMINAR PEDIDO DESDE EL DASHBOARD DEL ADMINISTRADOR
 @admin.route('/eliminar-pedido', methods=['POST'])
 @login_requerido
@@ -542,6 +543,7 @@ def guardar_maquinaria():
         cursor.close()
         
     return redirect(url_for('admin.dashboard'))
+
 #RUTA ELIMINAR MAQUINARIA/VOLQUETA
 @admin.route('/eliminar-maquinaria', methods=['POST'])
 @login_requerido
@@ -617,10 +619,10 @@ def generar_reporte():
     finally:
         cursor.close()
 
-    #GESTION DE HOARRIOS
-    @admin.route('/gestionar-horarios', methods=['POST'])
-    @login_requerido
-    def gestionar_horarios():
+#GESTION DE HOARRIOS
+@admin.route('/gestionar-horarios', methods=['POST'])
+@login_requerido
+def gestionar_horarios():
         from app import mysql
         
         id_maquina = request.form.get('id_maquina')
@@ -647,7 +649,7 @@ def generar_reporte():
             cursor.close()
             
         return redirect(url_for('admin.dashboard'))
-    
+
  #ELIMINAR HORARIOS DE CHOFERES Y OPERARIOS
 @admin.route('/eliminar-horario/<int:id_horario>', methods=['POST'])
 @login_requerido
@@ -673,31 +675,82 @@ def eliminar_horario(id_horario):
             cursor.close()
             
         return redirect(url_for('admin.consultar_turnos'))
-    
+
+#RUTA REGISTART NUEVO HORARIO
+@admin.route('/registrar/horario/guardar', methods=['POST'])
+@login_requerido
+def registrar_horario():
+    from app import mysql
+
+    operador = request.form["operador_id"]
+    fecha = request.form["fecha"]
+    hora_inicio = request.form["hora_inicio"]
+    hora_fin = request.form["hora_fin"]
+
+    cursor = mysql.connection.cursor()
+
+    try:
+        cursor.execute("""
+            INSERT INTO horarios (operador_id, fecha, hora_inicio, hora_fin)
+            VALUES (%s, %s, %s, %s)
+        """, (operador, fecha, hora_inicio, hora_fin))
+
+        mysql.connection.commit()
+        flash("Horario registrado correctamente", "success")
+
+    except Exception as e:
+        mysql.connection.rollback()
+        flash(str(e), "error")
+
+    finally:
+        cursor.close()
+
+    return redirect(url_for("admin.consultar_turnos"))
+
+
 #CONSULTA DE TURNOS DE CHOFERES Y OPERARIOS
 @admin.route('/consultar-turnos', methods=['GET'])
 @login_requerido
 def consultar_turnos():
-        from app import mysql
-        
-        cursor = mysql.connection.cursor()
-        
-        try:
-            cursor.execute("""
-                SELECT m.codigo_maquina, m.tipo, m.horario, u.username 
-                FROM maquinaria m
-                LEFT JOIN usuarios u ON m.operador_id = u.id
-            """)
-            turnos = cursor.fetchall()
-            
-            return render_template('admin/turnos.html', turnos=turnos)
-            
-        except Exception as e:
-            flash(f"Error al consultar los turnos: {str(e)}", "error")
-            return redirect(url_for('admin.dashboard'))
-            
-        finally:
-            cursor.close()
+    from app import mysql
+
+    cursor = mysql.connection.cursor()
+
+    try:
+        # Consultar turnos
+        cursor.execute("""
+            SELECT
+                h.id,
+                u.username,
+                h.fecha,
+                h.hora_inicio,
+                h.hora_fin
+            FROM horarios h
+            LEFT JOIN usuarios u ON h.operador_id = u.id
+        """)
+        turnos = cursor.fetchall()
+
+        # Consultar usuarios para el formulario
+        cursor.execute("""
+            SELECT id, username
+            FROM usuarios
+            WHERE rol IN ('Chofer', 'Operador')
+        """)
+        usuarios = cursor.fetchall()
+
+        return render_template(
+            "admin/dashboard.html",
+            turnos=turnos,
+            usuarios=usuarios
+        )
+
+    except Exception as e:
+        flash(f"Error al consultar los turnos: {str(e)}", "error")
+        return redirect(url_for("admin.dashboard"))
+
+    finally:
+        cursor.close()
+
 #ELIMINAR TURNO
 @admin.route('/eliminar-turno/<int:id_turno>', methods=['POST'])
 @login_requerido

@@ -528,8 +528,7 @@
                                                     <i class="fa-regular fa-calendar"></i> Fecha de Inicio
                                                 </label>
 
-                                                <input
-                                                    type="date" name="fecha_inicio" required style=" width:100%; padding:12px; border-radius:10px; border:1px solid #374151; background:#111827; color:white;">
+                                                <input type="date" name="fecha_inicio" required style=" width:100%; padding:12px; border-radius:10px; border:1px solid #374151; background:#111827; color:white;">
                                             </div>
                                             <!-- Fecha Fin -->
                                             <div>
@@ -618,33 +617,65 @@
                                     <div class="table-container">
                                         <h2>Turnos de Choferes y Operarios</h2>
                                         <table class="data-table">
-                                                <thead>
+                                               <thead>
                                                     <tr>
                                                         <th>ID</th>
-                                                        <th>Nombre del Usuario</th>
-                                                        <th>Rol</th>
-                                                        <th>Turno Asignado</th>
+                                                        <th>Operador</th>
+                                                        <th>Fecha</th>
+                                                        <th>Hora Inicio</th>
+                                                        <th>Hora Fin</th>
+                                                        <td>Maquinaria</td>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                    {% for turno in turnos %}
-                                                    <tr>
+                                                {% for turno in turnos %}
+                                                     <tr>
                                                         <td>{{ turno[0] }}</td>
                                                         <td>{{ turno[1] }}</td>
                                                         <td>{{ turno[2] }}</td>
                                                         <td>{{ turno[3] }}</td>
-                                                        <td>
-                                                            <form action="{{ url_for('admin.eliminar_turno', id_turno=turno[0]) }}" method="POST" style="display:inline;">
-                                                                <button type="submit" class="btn-delete" style="background: none; border: none; color: #ff4d4d; cursor: pointer;">
-                                                                    <i class="fa-solid fa-trash"></i> Borrar
-                                                                </button>
-                                                            </form>
+                                                        <td>{{ turno[4] }}</td>
                                                     </tr>
-                                                    {% endfor %}
+                                                {% endfor %}
                                                 </tbody>
                                         </table>
                                     </div>
                                      <!--Formulario de consuatr turnos de chefer y operadores-->  
+                                    <div >   
+                                        <div class="table-container" style="flex: 1; min-width: 300px;">
+                                            <h2>Registrar nuevo horario</h2>
+                                            <form action="{{ url_for('admin.registrar_horario') }}" method="POST">
+                                            <label >OPERARADOR</label>
+                                                    {% for usuario in usuarios %}
+                                                            <SELect name="operador_id" requered>
+                                                            <option value="{{usuario[0]}}"> 
+                                                            {{usuario[1]}}
+                                                            </option>
+                                                    {% endfor %}
+                                                    </SELect>
+                                            <label> Tipo de maquinaria</label>
+                                                    <select name="operador">    
+                                                        <option value="Exacvadora">Excabadora</option>
+                                                        <option value="Volqueta">Volqueta</option>
+                                                        <option value="Retroexacbadora">Retroexcabora </option>
+                                                    </select>
+                                            <label>Horario</label>
+                                                        <label>Fecha</label>
+                                                        <input type="date" name="fecha" required style="width:100%; padding:12px 16px; margin-bottom:18px; border:1px solid #374151; border-radius:10px; background:#111827; color:#ffffff; font-size:15px; outline:none; box-sizing:border-box;">
+                                                        
+                                                        <label>Hora de inicio</label>
+                                                        <input type="time" name="hora_inicio" required  style="width:100%; padding:12px 16px; margin-bottom:18px; border:1px solid #374151; border-radius:10px; background:#111827; color:#ffffff; font-size:15px; outline:none; box-sizing:border-box;">
+
+                                                        <label>Hora de fin</label>
+                                                        <input type="time" name="hora_fin" style="width:100%; padding:12px 16px; margin-bottom:18px; border:1px solid #374151; border-radius:10px; background:#111827; color:#ffffff; font-size:15px; outline:none; box-sizing:border-box;">
+                                                   
+                                                    
+                                            <button type="submit" class="btn-submit-panel" style="width:100%; padding:14px; font-size:16px; font-weight:bold; border-radius:12px;"> Guardar</button>
+                                            </form>
+                                            
+                                        </div>
+
+                                    </div>
 
                                 </div>
                                 <!-- ================= SECCIÓN 9: GESTION DE TURNOS DE CHOFERES Y OPERARIOS================= -->
@@ -680,7 +711,8 @@
                                         </tbody>
                                     </table>
                                 </div>
-                                 <!--Formulario de gestion de chefer y operadores--> 
+                                 <!--Formulario de gestion de chefer y operadores-->
+                                  
                                 </div>
             <script>
                 function cambiarSeccion(idSeccion, elementoActivo) {
