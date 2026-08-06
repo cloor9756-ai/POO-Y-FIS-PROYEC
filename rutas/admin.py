@@ -618,65 +618,104 @@ def generar_reporte():
         
     finally:
         cursor.close()
-
-#GESTION DE HOARRIOS
+#RUTA GESTION HORARIOS
 @admin.route('/gestionar-horarios', methods=['POST'])
 @login_requerido
 def gestionar_horarios():
-        from app import mysql
-        
-        id_maquina = request.form.get('id_maquina')
-        nuevo_horario = request.form.get('nuevo_horario')
-        
-        cursor = mysql.connection.cursor()
-        
-        try:
-            cursor.execute("""
-                UPDATE maquinaria 
-                SET horario = %s 
-                WHERE id = %s
-            """, 
-            (nuevo_horario, id_maquina))
-            
-            mysql.connection.commit()
-            flash("Horario actualizado correctamente.", "success")
-            
-        except Exception as e:
-            mysql.connection.rollback()
-            flash(f"Error al actualizar el horario: {str(e)}", "error")
-            
-        finally:
-            cursor.close()
-            
-        return redirect(url_for('admin.dashboard'))
+    from app import mysql
 
- #ELIMINAR HORARIOS DE CHOFERES Y OPERARIOS
-@admin.route('/eliminar-horario/<int:id_horario>', methods=['POST'])
+    id_maquina = request.form.get('id_maquina')
+    nuevo_horario = request.form.get('nuevo_horario')
+
+    cursor = mysql.connection.cursor()
+
+    try:
+        cursor.execute("""
+            UPDATE maquinaria 
+            SET horario = %s 
+            WHERE id = %s
+        """, (nuevo_horario, id_maquina))
+
+        mysql.connection.commit()
+
+        flash("Horario actualizado correctamente.", "success")
+
+    except Exception as e:
+        mysql.connection.rollback()
+        flash(f"Error al actualizar el horario: {str(e)}", "error")
+
+    finally:
+        cursor.close()
+
+    return redirect(url_for('admin.dashboard'))
+#CONSULTAR HORARIO
+@admin.route('/consultar-turnos', methods=['GET'])
 @login_requerido
-def eliminar_horario(id_horario):
-        from app import mysql
-        
-        cursor = mysql.connection.cursor()
-        
-        try:
-            cursor.execute(
-                "DELETE FROM maquinaria WHERE id = %s",
-                (id_horario,)
-            )
-            
-            mysql.connection.commit()
-            flash("Horario eliminado correctamente.", "success")
-            
-        except Exception as e:
-            mysql.connection.rollback()
-            flash(f"Error al eliminar el horario: {str(e)}", "error")
-            
-        finally:
-            cursor.close()
-            
-        return redirect(url_for('admin.consultar_turnos'))
+def consultar_turnos():
+    from app import mysql
 
-#RUTA REGISTART NUEVO HORARIO
+    cursor = mysql.connection.cursor()
+
+    try:
+        cursor.execute("""
+            SELECT
+                h.id,
+                u.username,
+                h.fecha,
+                h.hora_inicio,
+                h.hora_fin,
+                h.maquinaria
+            FROM horarios h
+            LEFT JOIN usuarios u
+                ON h.operador_id = u.id
+        """)
+
+        turnos = cursor.fetchall()
+
+        cursor.execute("""
+            SELECT id, username
+            FROM usuarios
+            WHERE rol IN ('Chofer','Operador')
+        """)
+
+        usuarios = cursor.fetchall()
+
+        return render_template(
+            "admin/dashboard.html",
+            turnos=turnos,
+            usuarios=usuarios
+        )
+
+    finally:
+        cursor.close()
+        
+@admin.route('/eliminar-turno/<int:id>', methods=['POST'])
+@login_requerido
+def eliminar_turno(id):
+
+    from app import mysql
+
+    cursor = mysql.connection.cursor()
+
+    try:
+        cursor.execute(
+            "DELETE FROM horarios WHERE id=%s",
+            (id,)
+        )
+
+        mysql.connection.commit()
+
+        flash("Turno eliminado correctamente", "success")
+
+    except Exception as e:
+        mysql.connection.rollback()
+        flash(str(e), "error")
+
+    finally:
+        cursor.close()
+
+    return redirect(url_for('admin.consultar_turnos'))
+
 @admin.route('/registrar/horario/guardar', methods=['POST'])
 @login_requerido
 def registrar_horario():
@@ -686,16 +725,27 @@ def registrar_horario():
     fecha = request.form["fecha"]
     hora_inicio = request.form["hora_inicio"]
     hora_fin = request.form["hora_fin"]
-
+    maquinaria = request.form["maquinaria"]
     cursor = mysql.connection.cursor()
 
     try:
-        cursor.execute("""
-            INSERT INTO horarios (operador_id, fecha, hora_inicio, hora_fin)
-            VALUES (%s, %s, %s, %s)
-        """, (operador, fecha, hora_inicio, hora_fin))
+        cursor.execute(
+            """
+            INSERT INTO horarios
+            (operador_id, fecha, hora_inicio, hora_fin, maquinaria)
+            VALUES (%s,%s,%s,%s,%s)
+            """,
+            (
+                operador,
+                fecha,
+                hora_inicio,
+                hora_fin,
+                maquinaria,
+            ),
+        )
 
         mysql.connection.commit()
+
         flash("Horario registrado correctamente", "success")
 
     except Exception as e:
@@ -706,73 +756,3 @@ def registrar_horario():
         cursor.close()
 
     return redirect(url_for("admin.consultar_turnos"))
-
-
-#CONSULTA DE TURNOS DE CHOFERES Y OPERARIOS
-@admin.route('/consultar-turnos', methods=['GET'])
-@login_requerido
-def consultar_turnos():
-    from app import mysql
-
-    cursor = mysql.connection.cursor()
-
-    try:
-        # Consultar turnos
-        cursor.execute("""
-            SELECT
-                h.id,
-                u.username,
-                h.fecha,
-                h.hora_inicio,
-                h.hora_fin
-            FROM horarios h
-            LEFT JOIN usuarios u ON h.operador_id = u.id
-        """)
-        turnos = cursor.fetchall()
-
-        # Consultar usuarios para el formulario
-        cursor.execute("""
-            SELECT id, username
-            FROM usuarios
-            WHERE rol IN ('Chofer', 'Operador')
-        """)
-        usuarios = cursor.fetchall()
-
-        return render_template(
-            "admin/dashboard.html",
-            turnos=turnos,
-            usuarios=usuarios
-        )
-
-    except Exception as e:
-        flash(f"Error al consultar los turnos: {str(e)}", "error")
-        return redirect(url_for("admin.dashboard"))
-
-    finally:
-        cursor.close()
-
-#ELIMINAR TURNO
-@admin.route('/eliminar-turno/<int:id_turno>', methods=['POST'])
-@login_requerido
-def eliminar_turno(id_turno):
-    from app import mysql
-    
-    cursor = mysql.connection.cursor()
-    
-    try:
-        cursor.execute(
-            "DELETE FROM maquinaria WHERE id = %s",
-            (id_turno,)
-        )
-        
-        mysql.connection.commit()
-        flash("Turno eliminado correctamente.", "success")
-        
-    except Exception as e:
-        mysql.connection.rollback()
-        flash(f"Error al eliminar el turno: {str(e)}", "error")
-        
-    finally:
-        cursor.close()
-        
-    return redirect(url_for('admin.consultar_turnos'))

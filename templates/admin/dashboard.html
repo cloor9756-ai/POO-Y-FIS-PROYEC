@@ -616,26 +616,38 @@
                                         <h2>Turnos de Choferes y Operarios</h2>
                                         <table class="data-table">
                                                <thead>
-                                                    <tr>
-                                                        <th>ID</th>
-                                                        <th>Operador</th>
-                                                        <th>Fecha</th>
-                                                        <th>Hora Inicio</th>
-                                                        <th>Hora Fin</th>
-                                                        <td>Maquinaria</td>
-                                                    </tr>
-                                                </thead>
+                                                <tr>
+                                                    <th>ID</th>
+                                                    <th>Operador</th>
+                                                    <th>Fecha</th>
+                                                    <th>Hora Inicio</th>
+                                                    <th>Hora Fin</th>
+                                                    <th>Maquinaria</th>
+                                                    <th>Acciones</th>
+                                                </tr>
+                                            </thead>
                                                 <tbody>
-                                                {% for turno in turnos %}
-                                                     <tr>
-                                                        <td>{{ turno[0] }}</td>
-                                                        <td>{{ turno[1] }}</td>
-                                                        <td>{{ turno[2] }}</td>
-                                                        <td>{{ turno[3] }}</td>
-                                                        <td>{{ turno[4] }}</td>
-                                                    </tr>
-                                                {% endfor %}
-                                                </tbody>
+                                                    {% for turno in turnos %}
+                                                        <tr>
+                                                            <td>{{ turno[0] }}</td>
+                                                            <td>{{ turno[1] }}</td>
+                                                            <td>{{ turno[2] }}</td>
+                                                            <td>{{ turno[3] }}</td>
+                                                            <td>{{ turno[4] }}</td>
+                                                            <td>{{ turno[5] }}</td>
+
+                                                            <td>
+                                                                <form action="{{ url_for('admin.eliminar_turno', id=turno[0]) }}"
+                                                                    method="POST"
+                                                                    onsubmit="return confirm('¿Desea eliminar este turno?');">
+                                                                    <button type="submit" class="btn-delete">
+                                                                        Eliminar
+                                                                    </button>
+                                                                </form>
+                                                            </td>
+                                                        </tr>
+                                                    {% endfor %}
+                                                    </tbody>
                                         </table>
                                     </div>
                                      <!--Formulario de consuatr turnos de chefer y operadores-->  
@@ -643,19 +655,18 @@
                                         <div class="table-container" style="flex: 1; min-width: 300px;">
                                             <h2>Registrar nuevo horario</h2>
                                             <form action="{{ url_for('admin.registrar_horario') }}" method="POST">
-                                            <label >OPERARADOR</label>
-                                                    {% for usuario in usuarios %}
-                                                            <SELect name="operador_id" requered>
-                                                            <option value="{{usuario[0]}}"> 
-                                                            {{usuario[1]}}
+                                            <label>OPERADOR</label>
+                                                    <select name="operador_id" required>
+                                                        {% for usuario in usuarios %}
+                                                            <option value="{{ usuario[0] }}">
+                                                                {{ usuario[1] }}
                                                             </option>
-                                                    {% endfor %}
-                                                    </SELect>
+                                                        {% endfor %}
+                                                    </select>
                                             <label> Tipo de maquinaria</label>
                                                     <select name="operador">    
-                                                        <option value="Exacvadora">Excabadora</option>
                                                         <option value="Volqueta">Volqueta</option>
-                                                        <option value="Retroexacbadora">Retroexcabora </option>
+                                                        <option value="Retroexcavadora">Retroexcavadora</option>
                                                     </select>
                                             <label>Horario</label>
                                                         <label>Fecha</label>
